@@ -113,7 +113,7 @@
                 priceLevel:this.priceChecked
             };
           this.loading = true;
-          axios.get(`/goods`,{
+          axios.get(`/goods/list`,{
               params:param
           }).then((res)=>{
             this.loading = false;
@@ -177,7 +177,7 @@
               if(res.data.status === "0"){
                   alert('加入购物车成功')
               }else{
-                  alert('加入购物车失败')
+                  alert(res.data.msg)
               }
           })
         },
