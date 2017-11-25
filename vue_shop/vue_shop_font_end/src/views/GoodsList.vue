@@ -130,10 +130,10 @@
                   this.goodsList = res.data.result.list;
                   if(res.data.result.count < this.pageSize){
                     this.busy = true;
-                    console.log(1111);
+
                   }else{
                     this.busy = false;
-                    console.log(2222);
+
                   }
 
                 }

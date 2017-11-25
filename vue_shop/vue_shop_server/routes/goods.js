@@ -70,7 +70,6 @@ router.get('/',(req,res,next)=>{
     router.post('/addCart',(req,res,next)=>{
         let userId = '100000077',productId = req.body.productId;
         let User = require('../models/user');
-        console.log(22222222)
         //先从用户集合中找出这个用户
         User.findOne({
             userId:userId
