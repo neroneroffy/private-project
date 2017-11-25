@@ -16,9 +16,9 @@
         <div class="navbar-menu-container">
           <!--<a href="/" class="navbar-link">我的账户</a>-->
           <span class="navbar-link"></span>
-          <a href="javascript:void(0)" class="navbar-link" @click="showLogin" v-if="!hasLogin">Login</a>
-          <a href="javascript:void(0)" class="navbar-link" v-if="!hasLogin">Logout</a>
+          <a href="javascript:void(0)" class="navbar-link" @click="showLogin" v-if="!hasLogin">登录</a>
           <a href="javascript:void(0)" class="navbar-link" v-if="hasLogin">{{userId}}</a>
+          <a href="javascript:void(0)" class="navbar-link" @click="logout" v-if="hasLogin">退出</a>
           <div class="navbar-cart-container">
             <span class="navbar-cart-count"></span>
             <a class="navbar-link navbar-cart-link" href="/#/cart">
@@ -88,6 +88,7 @@
         this.userPwd = "";
 
       },
+      //登录
       login(){
           if(!this.userName || !this.userPwd){
             this.errorTip = true;
@@ -107,6 +108,16 @@
                 this.userPwd = "";
               }else{
                 this.errorTip = true
+              }
+          })
+      },
+      //退出
+      logout(){
+          axios.post('/users/logout').then((response)=>{
+              let res = response.data;
+              if(res.status === "0"){
+                  this.hasLogin = false;
+                  this.userId = ""
               }
           })
       }
