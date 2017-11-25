@@ -48,6 +48,26 @@
           </div>
         </div>
       </div>
+      <Modal v-bind:mdShow="mdShow" @close="closeModal">
+        <p slot="message">
+          请先登录，否则无法加入到购物车中!
+        </p>
+        <div slot="btnGroup">
+          <a href="javascript:;" class="btn btn-m" @click="mdShow=false">关闭</a>
+        </div>
+      </Modal>
+      <Modal v-bind:mdShow="mdShowCart" @close="closeModal">
+        <p slot="message">
+          <svg class="icon-status-ok">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cart"></use>
+          </svg>
+          加入购物车成功
+        </p>
+        <div slot="btnGroup">
+          <a href="javascript:;" class="btn btn-m" @click="mdShowCart=false">继续购物</a>
+          <router-link href="javascript:;" class="btn btn-m" @click="mdShow=false" to="">查看购物车</router-link>
+        </div>
+      </Modal>
       <div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
       <NavFooter></NavFooter>
     </div>
@@ -55,6 +75,13 @@
 <style>
   .pagination-loading{
     text-align: center;
+  }
+  .btn:hover{
+    background:#ffe5e6 ;
+    transition:all .3s ease-out
+  }
+  .icon-status-ok{
+    font-size: 30px;
   }
 </style>
 <script>
@@ -64,6 +91,7 @@
     import NavFooter from '@/components/NavFooter.vue';
     import NavBread from '@/components/NavBread.vue';
     import axios from 'axios';
+    import Modal from '../components/Modal.vue';
     export default {
       mounted(){
           this.getGoodsData()
@@ -96,13 +124,16 @@
           page:1,
           pageSize:8,
           busy:true,
-          loading: false
+          loading: false,
+          mdShow:false,
+          mdShowCart:false
         }
       },
       components:{
         NavHeader,
         NavFooter,
-        NavBread
+        NavBread,
+        Modal
       },
       methods:{
         getGoodsData(flag){
@@ -130,7 +161,6 @@
                   this.goodsList = res.data.result.list;
                   if(res.data.result.count < this.pageSize){
                     this.busy = true;
-
                   }else{
                     this.busy = false;
 
@@ -173,11 +203,11 @@
           axios.post('/goods/addCart',{
               productId:productId
           }).then(res=>{
-              console.log(res);
               if(res.data.status === "0"){
-                  alert('加入购物车成功')
+                this.mdShowCart = true
               }else{
-                  alert(res.data.msg)
+                  this.mdShow = true
+
               }
           })
         },
@@ -198,6 +228,10 @@
         closePop(){
           this.filterBuy = false;
           this.overLayFlag = false
+        },
+        closeModal(){
+            this.mdShow = false;
+            this.mdShowCart = false
         }
       }
     }

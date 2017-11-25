@@ -7,7 +7,6 @@ router.get('/', function(req,res,next) {
 });
 //登录接口
 router.post('/login',function(req,res,next){
-
   let param = {
       userName:req.body.userName,
       userPwd:req.body.userPwd
