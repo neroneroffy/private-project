@@ -17,7 +17,7 @@ module.exports = {
       '/goods/*':{
         target:"http://localhost:3000"
       },
-      '/users/*':{
+      '/users/**':{//两个*是匹配多级路由
         target:"http://localhost:3000"
       },
 

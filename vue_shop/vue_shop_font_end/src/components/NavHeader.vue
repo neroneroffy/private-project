@@ -47,7 +47,7 @@
                 </li>
                 <li class="regi_form_input noMargin">
                   <i class="icon IconPwd"></i>
-                  <input type="password" tabindex="2" name="password" class="regi_login_input" v-model="userPwd" placeholder="密码">
+                  <input type="password" tabindex="2" name="password" class="regi_login_input" v-model="userPwd" placeholder="密码" @keyup.enter="login">
                 </li>
               </ul>
             </div>
@@ -84,7 +84,9 @@
       checkLogin(){
         axios.get('/users/checkLogin').then((res)=>{
           if(res.data.status === "0"){
-              this.userNickName = res.data.result.userNickName
+              console.log(res)
+              this.userNickName = res.data.result;
+              this.hasLogin = true
           }
         })
       },
@@ -109,9 +111,10 @@
             userPwd:this.userPwd
           }).then((response)=>{
               let res = response.data;
-              console.log(res)
+
               if(res.status ==="0"){
                 this.userNickName = document.cookie.split(';')[1].split("=")[1];
+                console.log(this.userNickName)
                 this.hasLogin = true;
                 this.errorTip = false;
                 this.showModal = false;

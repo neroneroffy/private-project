@@ -74,6 +74,77 @@ router.get('/checkLogin',(req,res,next)=>{
     })
   }
 });
+//查询当前用户的购物车数据
+router.get('/cartList',(req,res,next)=>{
+    let userId = req.cookies.userId;
+    User.findOne({
+        userId:userId
+    },(err,doc)=>{
+        if(err){
+            res.json({
+                status:"1",
+                msg:err.message,
+                result:""
+            })
+        }else{
+            if(doc){
+                doc.cartList;
+                res.json({
+                    status:"0",
+                    msg:"",
+                    result:doc.cartList
+                })
+            }
+        }
+    })
+});
+//删除用户购物车
+router.post('/cartdel',(req,res,next)=>{
+    let userId = req.cookies.userId, productId = req.body.productId;
+/*
+    User.find({
+        userId:userId
+    },(err,doc)=>{
+        if(err){
+            res.json({
+                status:"1",
+                msg:"err.msg",
+                result:""
+            })
+        }else{
+            if(doc){
+
+            }
+        }
+    })
+*/
+    console.log(userId)
+    console.log(productId)
+    User.update({
+        userId:userId
+    },
+    {
+        $pull:{
+            'cartList':{'productId':productId}
+        }
+    },(err,doc)=>{
+
+        if(err){
+            res.json({
+                status:"1",
+                msg:err.message,
+                result:""
+            });
+        }else{
+
+            res.json({
+                status:"0",
+                msg:"",
+                result:"suc"
+            })
+        }
+    })
+});
 module.exports = router;
 
 

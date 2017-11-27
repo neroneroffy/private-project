@@ -2,7 +2,7 @@
     <div id="good-list">
       <NavHeader></NavHeader>
       <NavBread>
-        <span>Goods</span>
+        <span>商品列表</span>
       </NavBread>
       <div class="accessory-result-page accessory-page">
         <div class="container">
@@ -65,7 +65,7 @@
         </p>
         <div slot="btnGroup">
           <a href="javascript:;" class="btn btn-m" @click="mdShowCart=false">继续购物</a>
-          <router-link href="javascript:;" class="btn btn-m" @click="mdShow=false" to="">查看购物车</router-link>
+          <router-link class="btn btn-m" @click="mdShow=false" to="/cart">查看购物车</router-link>
         </div>
       </Modal>
       <div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
