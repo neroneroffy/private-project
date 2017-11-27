@@ -25,16 +25,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 //拦截登录
 app.use((req,res,next)=>{
-    console.log("链接到后台")
     if(req.cookies.userId){
         next()
-        console.log("已经登录")
     }else{
       console.log(req.originalUrl);
         if(req.originalUrl === '/users/login' || req.originalUrl === '/users/logout' || req.path === '/goods/list'){
             next();
         }else{
-            console.log("未登录")
             res.json({
                 status:"10001",
                 msg:"当前未登录",

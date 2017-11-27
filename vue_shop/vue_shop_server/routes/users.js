@@ -101,25 +101,6 @@ router.get('/cartList',(req,res,next)=>{
 //删除用户购物车
 router.post('/cartdel',(req,res,next)=>{
     let userId = req.cookies.userId, productId = req.body.productId;
-/*
-    User.find({
-        userId:userId
-    },(err,doc)=>{
-        if(err){
-            res.json({
-                status:"1",
-                msg:"err.msg",
-                result:""
-            })
-        }else{
-            if(doc){
-
-            }
-        }
-    })
-*/
-    console.log(userId)
-    console.log(productId)
     User.update({
         userId:userId
     },
@@ -145,6 +126,33 @@ router.post('/cartdel',(req,res,next)=>{
         }
     })
 });
+//编辑用户购物车商品数量
+router.post('/cartEdit',(req,res,next)=>{
+    let userId = req.cookies.userId,
+        productId = req.body.productId,
+        productNum = req.body.productNum,
+        checked = req.body.checked;
+    console.log(productId);
+    console.log(productNum);
+    User.update({userId:userId,"cartList.productId":productId},{
+        "cartList.$.productNum":productNum,
+        "cartList.$.checked":checked
+    },(err,doc)=>{
+        if(err){
+            res.json({
+                status:"1",
+                msg:err.message,
+                result:""
+            });
+        }else{
+            res.json({
+                status:"0",
+                msg:"",
+                result:"suc"
+            })
+        }
+    })
+})
 module.exports = router;
 
 

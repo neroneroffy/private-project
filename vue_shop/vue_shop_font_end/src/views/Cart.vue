@@ -82,9 +82,9 @@
                     <div class="item-quantity">
                       <div class="select-self select-self-open">
                         <div class="select-self-area">
-                          <a class="input-sub">-</a>
+                          <a class="input-sub" @click="editCart('minu',item)">-</a>
                           <span class="select-ipt">{{item.productNum}}</span>
-                          <a class="input-add">+</a>
+                          <a class="input-add" @click="editCart('add',item)">+</a>
                         </div>
                       </div>
                     </div>
@@ -203,6 +203,31 @@
         },
         closeModal(){
           this.modalConfirm = false
+        },
+        editCart(flag,item){
+
+            if(flag === 'add'){
+              item.productNum ++;
+            }else if(flag === 'minus'){
+                if(item.productNum <= 1){
+                    return
+                }
+              item.productNum --;
+            }else{
+              item.checked = item.checked === "1"? '0':'1'
+              console.log(item.checked)
+          }
+            //改变商品数量
+            axios.post('/users/cartEdit',{
+              productId:item.productId,
+              productNum:item.productNum,
+              checked:item.checked
+            }).then((response)=>{
+                let res = response.data;
+                if(res.status === '0'){
+
+              }
+            })
         }
       }
   }
