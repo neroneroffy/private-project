@@ -76,7 +76,7 @@
                     </div>
                   </div>
                   <div class="cart-tab-2">
-                    <div class="item-price">{{Number(item.salePrice).toFixed(2)}}</div>
+                    <div class="item-price">{{item.salePrice | currency('¥')}}</div>
                   </div>
                   <div class="cart-tab-3">
                     <div class="item-quantity">
@@ -109,17 +109,17 @@
             <div class="cart-foot-inner">
               <div class="cart-foot-l">
                 <div class="item-all-check">
-                  <a href="javascipt:;">
-                  <span class="checkbox-btn item-check-btn">
+                  <a href="javascipt:;" @click="toggleCheckAll">
+                  <span class="checkbox-btn item-check-btn" :class="{'check':checkAllFlag}">
                       <svg class="icon icon-ok"><use xlink:href="#icon-ok"/></svg>
                   </span>
-                    <span>Select all</span>
+                    <span>全选</span>
                   </a>
                 </div>
               </div>
               <div class="cart-foot-r">
                 <div class="item-total">
-                  Item total: <span class="total-price">500</span>
+                  Item total: <span class="total-price">{{totalPrice | currency('¥')}}</span>
                 </div>
                 <div class="btn-wrap">
                   <a class="btn btn--red">Checkout</a>
@@ -161,7 +161,7 @@
         return {
           cartList:[],
           modalConfirm:false,
-          delId:""
+          delId:"",
         }
       },
       components:{
@@ -228,8 +228,45 @@
 
               }
             })
+        },
+        toggleCheckAll(){
+            let flag = !this.checkAllFlag;
+            this.cartList.forEach((item)=>{
+                item.checked = flag?'1':'0'
+            });
+          axios.post('/users/editCheckAll',{
+              checkAll:flag
+          }).then((response)=>{
+            let res=response.data;
+            if(res.status === '0'){
+                console.log('update suc')
+            }
+          })
         }
+      },
+    computed:{
+      checkAllFlag(){
+        return this.checkedCount === this.cartList.length
+      },
+      checkedCount(){
+        let i = 0;
+        this.cartList.forEach((item)=>{
+            if(item.checked === '1'){
+                i++;
+            }
+        });
+        return i
+      },
+      totalPrice(){
+        let money = 0;
+        this.cartList.forEach((item)=>{
+            if(item.checked === '1'){
+                money += parseFloat(item.salePrice)*parseInt(item.productNum)
+            }
+        })
+        return money
       }
+    }
   }
 </script>
 <style>

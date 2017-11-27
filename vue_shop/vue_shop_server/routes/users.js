@@ -132,8 +132,6 @@ router.post('/cartEdit',(req,res,next)=>{
         productId = req.body.productId,
         productNum = req.body.productNum,
         checked = req.body.checked;
-    console.log(productId);
-    console.log(productNum);
     User.update({userId:userId,"cartList.productId":productId},{
         "cartList.$.productNum":productNum,
         "cartList.$.checked":checked
@@ -152,7 +150,44 @@ router.post('/cartEdit',(req,res,next)=>{
             })
         }
     })
-})
+});
+//全选接口
+router.post('/editCheckAll',(req,res,next)=>{
+    let userId = req.cookies.userId,
+        checkAll = req.body.checkAll?"1":"0";
+    User.findOne({userId:userId},(err,user)=>{
+        if(err){
+            res.json({
+                status:"1",
+                msg:err.message,
+                result:""
+            });
+        }else{
+            if(user){
+                user.cartList.forEach((item)=>{
+                    item.checked = checkAll;
+                });
+                user.save((err1,doc)=>{
+                    if(err1){
+                        res.json({
+                            status:"1",
+                            msg:err.message,
+                            result:""
+                        })
+                    }else{
+                        res.json({
+                            status:"0",
+                            msg:"",
+                            result:"suc"
+                        })
+                    }
+                })
+            }
+        }
+
+    })
+
+});
 module.exports = router;
 
 
