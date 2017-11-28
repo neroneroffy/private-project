@@ -177,7 +177,9 @@
                     this.addressList = res.result;
                     this.addressList.forEach((item,index)=>{
                         if(item.isDefault){
-                            this.checkIndex = index
+                            this.checkIndex = index;
+                            this.selectedAddrId = item.addressId;
+                            console.log(this.selectedAddrId)
                         }
                     })
                 }

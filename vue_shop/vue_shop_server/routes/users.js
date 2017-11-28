@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+require('./../util/dateFormat');
 let User = require('../models/user');
 /* GET users listing. */
 router.get('/', function(req,res,next) {
@@ -274,6 +275,72 @@ router.post('/delAddress',(req,res,next)=>{
         }
     })
 });
+router.post('/payMent',(req,res,next)=>{
+    let userId = req.cookies.userId,
+        orderTotal = req.body.orderTotal,
+        addressId = req.body.addressId;
+
+    User.findOne({userId:userId},(err,doc)=>{
+        if(err){
+            res.json({
+                status:"1",
+                msg:err.message,
+                result:""
+            })
+        }else{
+
+            let address = "",
+                goodsList = [];
+            //获取当前用户的地址信息
+            doc.addressList.forEach((item)=>{
+                if(addressId === item.addressId){
+                    address = item
+                }
+            });
+            //获取用户购物车购买的商品
+            doc.cartList.filter((item)=>{
+                if(item.checked === '1'){
+                    goodsList.push(item);
+                }
+            });
+            let platform = "622";//生成平台的标识码
+            let r1 = Math.floor(Math.random()*10);
+            let r2 = Math.floor(Math.random()*10);
+            let sysDate = new Date().Format('yyyyMMddhhmmss');
+            let caeateDate = new Date().Format('yyyy-MM-dd hh:mm:ss');
+            let orderId = platform+r1+sysDate+r2;
+            //创建订单
+            let order = {
+                orderId:orderId,
+                orderTotal:orderTotal,
+                addressInfo:address,
+                goodsList:goodsList,
+                orderStatus:"1",
+                createDate:caeateDate
+            };
+            doc.orderList.push(order);
+            doc.save((err1,doc1)=>{
+                if(err1){
+                    res.json({
+                        status:"1",
+                        msg:err.message,
+                        result:""
+                    })
+                }else{
+                    res.json({
+                        status:"0",
+                        msg:"",
+                        result:{
+                            orderId:order.orderId,
+                            orderTotal:order.orderTotal,
+                        }
+                    })
+
+                }
+            });
+        }
+    })
+})
 module.exports = router;
 
 
