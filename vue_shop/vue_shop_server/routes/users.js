@@ -186,7 +186,93 @@ router.post('/editCheckAll',(req,res,next)=>{
         }
 
     })
+});
+//获取用户地址列表
+router.get('/addressList',(req,res,next)=>{
+    let userId = req.cookies.userId;
+    User.findOne({userId:userId},(err,doc)=>{
+        if(err){
+            res.json({
+                status:"1",
+                msg:err.message,
+                result:""
+            })
+        }else{
+            res.json({
+                status:"0",
+                msg:"",
+                result:doc.addressList
+            })
+        }
+    })
+});
+//设置默认地址
+router.post('/setDefault',(req,res,next)=>{
+    let userId = req.cookies.userId,addressId = req.body.addressId;
+    if(!addressId){
+        res.json({
+            status:"1003",
+            msg:"addressId is null",
+            result:""
+        })
+    }else{
+        User.findOne({userId:userId},(err,doc)=>{
+            if(err){
+                res.json({
+                    status:"1",
+                    msg:err.message,
+                    result:""
+                })
+            }else{
+                let addressList = doc.addressList;
+                addressList.forEach((item)=>{
+                    item.isDefault = item.addressId === addressId? true:false
+                });
+                doc.save((err1,doc1)=>{
+                    if(err1){
+                        res.json({
+                            status:"1",
+                            msg:err1.message,
+                            result:""
+                        })
+                    }else{
+                        res.json({
+                            status:"0",
+                            msg:"",
+                            result:''
+                        })
+                    }
+                })
+            }
+        })
+    }
+});
+router.post('/delAddress',(req,res,next)=>{
+    let userId = req.cookies.userId,addressId = req.body.addressId;
+    User.update({
+        userId:userId
+    },{
+        $pull:{
+            'addressList':{
+                'addressId':addressId
+            }
+        }
+    },(err,doc)=>{
+        if(err){
+            res.json({
+                status:"1",
+                msg:err.message,
+                result:""
+            })
+        }else{
+            res.json({
+                status:"0",
+                msg:"",
+                result:""
+            })
 
+        }
+    })
 });
 module.exports = router;
 

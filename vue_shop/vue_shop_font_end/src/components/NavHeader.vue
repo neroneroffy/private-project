@@ -84,7 +84,6 @@
       checkLogin(){
         axios.get('/users/checkLogin').then((res)=>{
           if(res.data.status === "0"){
-              console.log(res)
               this.userNickName = res.data.result;
               this.hasLogin = true
           }
