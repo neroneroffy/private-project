@@ -17,11 +17,12 @@
           <!--<a href="/" class="navbar-link">我的账户</a>-->
           <span class="navbar-link"></span>
           <a href="javascript:void(0)" class="navbar-link" @click="showLogin" v-if="!hasLogin">登录</a>
-          <a href="javascript:void(0)" class="navbar-link" v-if="hasLogin">{{userNickName}}</a>
+          <a href="javascript:void(0)" class="navbar-link" v-if="hasLogin">{{nickName}}</a>
           <a href="javascript:void(0)" class="navbar-link" @click="logout" v-if="hasLogin">退出</a>
-          <div class="navbar-cart-container">
+          <div class="navbar-cart-container"  v-if="hasLogin">
             <span class="navbar-cart-count"></span>
             <router-link class="navbar-link navbar-cart-link" to="/cart">
+              <span class="cart-count">{{cartCount}}</span>
               <svg class="navbar-cart-logo">
                 <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-cart"></use>
               </svg>
@@ -74,18 +75,28 @@
           errorTip:false,
           showModal:false,
           hasLogin:false,
-          userNickName:""
+          //nickName:""
+        }
+    },
+    computed:{
+        nickName(){
+          return this.$store.state.nickName;
+        },
+        cartCount(){
+          return this.$store.state.cartCount
         }
     },
     mounted(){
         this.checkLogin();
-  },
+    },
     methods:{
       checkLogin(){
         axios.get('/users/checkLogin').then((res)=>{
           if(res.data.status === "0"){
-              this.userNickName = res.data.result;
-              this.hasLogin = true
+              //this.nickName = res.data.result;
+            this.$store.commit("updateUserInfo",res.data.result)
+            this.hasLogin = true;
+            this.getCartCount()
           }
         })
       },
@@ -112,13 +123,14 @@
               let res = response.data;
 
               if(res.status ==="0"){
-                this.userNickName = document.cookie.split(';')[1].split("=")[1];
-                console.log(this.userNickName)
+                //this.nickName = document.cookie.split(';')[1].split("=")[1];
+                this.$store.commit("updateUserInfo",document.cookie.split(';')[1].split("=")[1]);
                 this.hasLogin = true;
                 this.errorTip = false;
                 this.showModal = false;
                 this.userName = "";
                 this.userPwd = "";
+                this.getCartCount()
               }else{
                 this.errorTip = true
               }
@@ -129,14 +141,38 @@
           axios.post('/users/logout').then((response)=>{
               let res = response.data;
               if(res.status === "0"){
-                  this.hasLogin = false;
-                  this.userNickName = ""
+                this.hasLogin = false;
+                //this.nickName = "";
+                this.$store.commit("updateUserInfo","");
+                //this.$store.commit("initCartCount",this.cartCount)
               }
+          })
+      },
+      getCartCount(){
+          axios.get('/users/getCartCount').then((response)=>{
+              let res = response.data;
+              this.$store.commit("initCartCount",res.result)
           })
       }
     }
   }
 </script>
 <style>
-
+  .navbar-cart-link{
+    position: relative;
+  }
+  .cart-count{
+    position: absolute;
+    top:-15px;
+    left: -3px;
+    background: red;
+    display: block;
+    width: 15px;
+    height: 15px;
+    line-height: 15px;
+    text-align: center;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 10px;
+  }
 </style>

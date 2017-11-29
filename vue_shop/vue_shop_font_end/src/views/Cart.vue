@@ -59,7 +59,7 @@
                 </ul>
               </div>
               <ul class="cart-item-list">
-                <li v-for="item in cartList">
+                <li v-for="(item,index) in cartList">
                   <div class="cart-tab-1">
                     <div class="cart-item-check">
                       <a href="javascipt:;" class="checkbox-btn item-check-btn" v-bind:class="{'check':item.checked=='1'}" @click="editCart('checked',item)">
@@ -82,7 +82,7 @@
                     <div class="item-quantity">
                       <div class="select-self select-self-open">
                         <div class="select-self-area">
-                          <a class="input-sub" @click="editCart('minu',item)">-</a>
+                          <a class="input-sub" @click="editCart('minus',item)">-</a>
                           <span class="select-ipt">{{item.productNum}}</span>
                           <a class="input-add" @click="editCart('add',item)">+</a>
                         </div>
@@ -94,7 +94,7 @@
                   </div>
                   <div class="cart-tab-5">
                     <div class="cart-item-opration">
-                      <a href="javascript:;" class="item-edit-btn" @click="delConfirm(item.productId)">
+                      <a href="javascript:;" class="item-edit-btn" @click="delConfirm(item.productId,index)">
                         <svg class="icon icon-del">
                           <use xlink:href="#icon-del"></use>
                         </svg>
@@ -162,6 +162,7 @@
           cartList:[],
           modalConfirm:false,
           delId:"",
+          itemCount:0
         }
       },
       components:{
@@ -178,18 +179,17 @@
               axios.get('users/cartList').then((response)=>{
                   let res = response.data;
                   this.cartList = res.result;
-                  console.log(this.cartList)
               })
           },
-        delConfirm(id){
+        delConfirm(id,i){
           this.delId = id;
-          this.modalConfirm = true
+          this.modalConfirm = true;
+          this.itemCount = -this.cartList[i].productNum
         },
         closeModal(){
           this.modalConfirm = false
         },
         delCart(){
-
           axios.post('/users/cartdel',{
             productId:this.delId
           }).then((response)=>{
@@ -198,6 +198,7 @@
                   this.modalConfirm = false;
                   this.init();
                   this.modalConfirm = false;
+                  this.$store.commit("updateCartCount",this.itemCount)
               }
           })
         },
@@ -208,14 +209,15 @@
 
             if(flag === 'add'){
               item.productNum ++;
+
             }else if(flag === 'minus'){
                 if(item.productNum <= 1){
                     return
                 }
               item.productNum --;
+
             }else{
               item.checked = item.checked === "1"? '0':'1'
-              console.log(item.checked)
           }
             //改变商品数量
             axios.post('/users/cartEdit',{
@@ -224,9 +226,14 @@
               checked:item.checked
             }).then((response)=>{
                 let res = response.data;
-                if(res.status === '0'){
-
-              }
+                let num = 0;
+                if(res.result)
+                if(flag === 'minus'){
+                    num = -1
+                }else if(flag = "add"){
+                    num = 1
+                }
+                this.$store.commit("updateCartCount",num)
             })
         },
         toggleCheckAll(){
@@ -270,7 +277,7 @@
             if(item.checked === '1'){
                 money += parseFloat(item.salePrice)*parseInt(item.productNum)
             }
-        })
+        });
         return money
       }
     }
