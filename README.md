@@ -1,7 +1,7 @@
 ﻿# 个人练习项目
 
 ## vue.js + node.js + MongoDB 商城实现（练习项目）
-技术：Vue 2.5.2  Vue-Router  Vuex  Node.js  MongoDB WebPack
+技术：Vue2.5.2, Vue-Router, Vuex, Node.js, MongoDB, WebPack
 
 前端页面使用vue构建，不再mock数据，后端服务器由Node.js的Express框架搭建，数据库为MongoDB，利用Mongoose操作数据库，网络请求为axios。
 
