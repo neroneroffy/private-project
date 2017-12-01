@@ -41,7 +41,6 @@ router.get('/list',(req,res,next)=>{
                 $lte:priceLte
             }
         };
-
     }
     let goodsModal = Goods.find(params).skip(skip).limit(pageSize);//分页查询，跳过多少条
 
@@ -147,5 +146,5 @@ router.get('/list',(req,res,next)=>{
             }
         })
     })
-})
+});
 module.exports = router;
