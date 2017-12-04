@@ -22,12 +22,13 @@ mongoose.connection.on('disconnected',()=>{
 });
 
 router.post('/',(req,res,next)=>{
+
     let form = new Formidable.IncomingForm();
     form.encoding = 'utf-8';
     form.uploadDir = '/project/vue/vue_uploader/my-server/public/images';//定义文件存放地址
     form.keepExtensions = true;
-    form.multiples = true;//支持多文件上传
-    //form.maxFieldsSize = 2*1024*1024
+    form.multiples = false;//以单文件依次上传的方式，实现多文件上传
+    form.maxFieldsSize = 1*1024;
     //解析图片，重命名图片名称，返回给前端。
     let fileData = "";
     let fileDir = "images";//定义文件的存放路径
@@ -47,7 +48,7 @@ router.post('/',(req,res,next)=>{
         let picName = name + time + '.' + type;
         let newPath = form.uploadDir + "/" + picName;
         let oldPath = form.uploadDir + "/"+ file.path.substring(file.path.indexOf(route));
-        console.log(file.path);
+
         fs.renameSync(oldPath, newPath); //重命名
         fileData = {
             id:`${new Date().getTime()}`,
@@ -73,11 +74,11 @@ router.post('/',(req,res,next)=>{
 
 
     form.parse(req,(err,fields,files)=>{
+
+
         //传多个文件
         if(files.file instanceof Array){
-            files.file.forEach((item)=>{
-                handleFile(item)
-            })
+            return
         }else{
          //传单个文件
             handleFile(files.file)
@@ -104,6 +105,13 @@ router.post('/',(req,res,next)=>{
                 data:latestFileData
             })
         },200)
+    });
+    form.on('progress',(bytesReceived, bytesExpected)=>{
+/*
+        console.log('收到的---'+bytesReceived);
+        console.log('全部的---'+bytesExpected);
+        console.log('百分比---'+bytesReceived/bytesExpected);
+*/
     })
 
 });

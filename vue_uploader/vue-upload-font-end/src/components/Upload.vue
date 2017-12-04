@@ -20,9 +20,19 @@
             </form>
             <iframe id="rfFrame" name="rfFrame" src="about:blank" style="display:none;"></iframe>
             <div class="upload-content-right-content">
-              <div class="upload-content-right-item" v-for="(item,index) in fileList">
-                <img :src=item alt="">
+              <div class="upload-content-right-item-wrapper" v-for="(item,index) in fileList">
+                <div class="upload-content-right-item">
+                  <img :src=item.url alt="">
+                  <div class="upload-progress">
+                    <div class="upload-progress-inner" ref="progress" :class="{'too-large':item.size>maxSize}"></div>
+                  </div>
+                </div>
+                <div class="upload-content-right-item-info">
+                  <div class="upload-content-right-pic-name">{{item.name}}</div>
+                  <div class="upload-content-right-pic-size">{{item.size}}</div>
+                </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -34,18 +44,7 @@
       <div class="upload-modal" @click="closePicBox">
 
       </div>
-<!--
-      <el-upload
-        class="upload-demo"
-        action="https://jsonplaceholder.typicode.com/posts/"
-        :on-preview="handlePreview"
-        :on-remove="handleRemove"
-        :file-list="fileList2"
-        list-type="picture">
-        <el-button size="small" type="primary">点击上传</el-button>
-        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
-      </el-upload>
--->
+
     </div>
 </template>
 
@@ -56,7 +55,10 @@
         },
       data() {
         return {
-          fileList:[]
+          fileList:[],
+          progress:0,
+          tooLorge:false,
+          maxSize :2*1024*1024
         };
       },
       methods: {
@@ -64,25 +66,65 @@
             this.$emit('close')
         },
         uploadImage($event){
+
           let file=$event.target,
-              formData = new FormData();
-          //将数据插入表单
-          for(let i = 0;i<file.files.length;i++){
-            let fileReader = new FileReader();
-            formData.append('file',file.files[i],file.files[i].name);
-            fileReader.readAsDataURL(file.files[i]);
-            fileReader.onload=()=>{
-              this.fileList.push(fileReader.result)
+          formData = new FormData();
+          //递归调用自身，实现多文件依次上传
+          let _this = this;
+          let count = 0;
+
+          let previewData = {};
+          function upload(){
+            //定义axios配置信息
+            let config = {
+              headers: {'Content-Type': 'multipart/form-data'},
+              onUploadProgress(progressEvent){
+                if(progressEvent.lengthComputable){
+                  _this.progress = progressEvent.total/progressEvent.loaded;
+                  _this.$refs.progress[_this.$refs.progress.length-1].style.width = Number(_this.progress).toFixed(2)*100+"%"
+                }
+              }
             };
-          };
+            //向formData中插入文件
+            formData.append('file',file.files[count],file.files[count].name);
+            let fileReader = new FileReader();
+            fileReader.readAsDataURL(file.files[count]);
+            fileReader.onload=()=>{
+              previewData = {
+                url:fileReader.result,
+                name:file.files[count].name,
+                size:file.files[count].size,
+              };
+              _this.fileList.push(previewData)
+            };
+            fileReader.onloadend=()=>{
+              //检测图片大小是否超出限制
+              if(formData.get('file').size>_this.maxSize){
+                formData.delete('file');
+                //当图片全部上传完毕，停止递归
+                count++;
+                if(count > file.files.length-1){
+                  return
+                }
+                upload()
+              }else{
+                  //发送数据
+                  axios.post('/upload',formData,config).then((response)=>{
+                    formData.delete('file');
+                    count++;
+                    if(count > file.files.length-1){
+                      return
+                    }
+                    upload()
+                  }).catch((err)=>{
+                    console.log(err)
+                  });
+                }
+            };
+          }
 
-          let config = {
-            headers: {'Content-Type': 'multipart/form-data'}
-          };
-          axios.post('/upload',formData,config).then((response)=>{
-            console.log(response.data)
-          });
-
+          //第一次调用
+          upload();
           document.forms[0].target="rfFrame";
         }
       }
@@ -99,7 +141,7 @@
     right:0;
     bottom:0;
     margin:auto;
-    z-index: 9999;
+    z-index: 9996;
   }
   #upload .upload-modal{
     width: 100%;
@@ -110,7 +152,7 @@
     right:0;
     bottom:0;
     margin:auto;
-    z-index: 9998;
+    z-index: 9995;
     background: rgba(0,0,0,0.5);
   }
   #upload .upload-header{
@@ -188,12 +230,39 @@
   #upload .upload-content .upload-content-right .upload-content-right-item{
     width: 120px;
     height: 120px;
+    background: #e1e1e1;
     overflow: hidden;
     position: relative;
     border-radius: 5px;
     flex: 0 0 auto;
     margin:6px;
     cursor: pointer;
+  }
+  /*进度条*/
+  #upload .upload-progress{
+    width: 95%;
+    height: 10px;
+    position: absolute;
+    bottom:10px;
+    left:50%;
+    margin-left:-47.5%;
+    border-radius: 4px;
+    overflow: hidden;
+    z-index: 9999;
+  }
+  #upload .upload-progress-inner{
+    width: 0;
+    height: 10px;
+    background: #48e119;
+    transition: width .2s ease-in
+  }
+  #upload .too-large{
+    width: 100%;
+    height: 10px;
+    background: #e1241a!important;
+  }
+  #upload .upload-content-right-item-wrapper{
+    margin-bottom: 10px;
   }
   #upload .upload-content .upload-content-right .upload-content-right-item:hover img{
     opacity: 0.8;
@@ -206,7 +275,7 @@
     right:0;
     bottom:0;
     margin:auto;
-    z-index: 9999;
+    z-index: 9998;
 
   }
 
@@ -240,5 +309,13 @@
     right:20px;
     cursor: pointer;
     font-size: 0;
+  }
+  #upload .upload-content-right-item-info{
+    font-size: 10px;
+    color: #878787;
+    text-align: left;
+  }
+  #upload .upload-content-right-item-info div{
+    margin-left: 5px;
   }
 </style>
