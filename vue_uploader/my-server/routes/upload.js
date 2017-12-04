@@ -74,8 +74,6 @@ router.post('/',(req,res,next)=>{
 
 
     form.parse(req,(err,fields,files)=>{
-
-
         //传多个文件
         if(files.file instanceof Array){
             return
@@ -106,13 +104,7 @@ router.post('/',(req,res,next)=>{
             })
         },200)
     });
-    form.on('progress',(bytesReceived, bytesExpected)=>{
-/*
-        console.log('收到的---'+bytesReceived);
-        console.log('全部的---'+bytesExpected);
-        console.log('百分比---'+bytesReceived/bytesExpected);
-*/
-    })
+
 
 });
 module.exports = router;

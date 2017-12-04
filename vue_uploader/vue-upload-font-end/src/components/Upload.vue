@@ -7,9 +7,8 @@
         </div>
         <div class="upload-content">
           <div class="upload-content-left">
-            <div class="upload-content-left-item">分组一</div>
-            <div class="upload-content-left-item">分组二</div>
-            <div class="upload-content-left-item">分组三</div>
+            <div class="upload-content-left-item" @click="menuSelect($event)" :class="{'upload-content-left-item-active':activeFlag===item}" v-for="item in menuData">{{item}}</div>
+
           </div>
           <div class="upload-content-right">
             <form class="upload-content-right-top" enctype="multipart/form-data" ref="formSubmit" >
@@ -20,10 +19,16 @@
             </form>
             <iframe id="rfFrame" name="rfFrame" src="about:blank" style="display:none;"></iframe>
             <div class="upload-content-right-content">
+              <div class="upload-content-loading" v-if="uploadLoading">
+                <img src="../assets/loading.gif" alt="">
+              </div>
+              <div class="upload-content-no-pics" v-if="noPic">
+                暂无图片
+              </div>
               <div class="upload-content-right-item-wrapper" v-for="(item,index) in fileList">
                 <div class="upload-content-right-item">
                   <img :src=item.url alt="">
-                  <div class="upload-progress">
+                  <div class="upload-progress" v-if="progressShow">
                     <div class="upload-progress-inner" ref="progress" :class="{'too-large':item.size>maxSize}"></div>
                   </div>
                 </div>
@@ -58,12 +63,42 @@
           fileList:[],
           progress:0,
           tooLorge:false,
-          maxSize :2*1024*1024
+          maxSize :2*1024*1024,
+          progressShow:false,
+          uploadLoading:false,
+          noPic:false,
+          activeFlag:"",
+          menuData:['在线管理','分组一','分组二','分组三']
         };
       },
       methods: {
         closePicBox(){
             this.$emit('close')
+        },
+        menuSelect($event){
+          //设置按钮激活状态
+          this.activeFlag = $event.target.innerHTML;
+          if($event.target.innerHTML === '在线管理'){
+            this.uploadLoading = true;
+            axios.get('/all').then((response)=>{
+              let res = response.data;
+              this.uploadLoading = false;
+              if(res.result){
+                this.progressShow = false;
+                if(res.data.length !==0){
+                  this.noPic = false;
+                  this.fileList = res.data
+                }else{
+                  this.noPic = true;
+                }
+
+              }else{
+                this.noPic = true;
+                console.log(res.msg)
+              }
+            })
+          }
+
         },
         uploadImage($event){
 
@@ -95,7 +130,8 @@
                 name:file.files[count].name,
                 size:file.files[count].size,
               };
-              _this.fileList.push(previewData)
+              _this.fileList.push(previewData);
+              _this.progressShow = true
             };
             fileReader.onloadend=()=>{
               //检测图片大小是否超出限制
@@ -189,6 +225,10 @@
     background: #3eb5dd;
     color: #fff;
   }
+  #upload .uploader-bottom .uploader-bottom-confirm:hover{
+    background: #259bd6;
+    color: #fff;
+  }
   #upload .uploader-bottom .uploader-bottom-cancel{
     color: #878787;
     border:1px solid #e4e4e4;
@@ -206,12 +246,15 @@
   #upload .upload-content .upload-content-right{
     width: 75%
   }
-  #upload .upload-content .upload-content-left .upload-content-left-item{
+  #upload .upload-content .upload-content-left .upload-content-left-item,#upload .upload-content .upload-content-left .upload-content-left-item-active{
     height: 38px;
     padding-left: 20px;
     text-align: left;
     line-height: 38px;
     cursor: pointer;
+  }
+  #upload .upload-content .upload-content-left .upload-content-left-item-active{
+    background: #f2f2f2;
   }
   #upload .upload-content .upload-content-left .upload-content-left-item:hover{
     background: #f2f2f2;
@@ -226,6 +269,7 @@
     flex-wrap: wrap;
     align-content: flex-start;
     overflow: auto;
+    position: relative;
   }
   #upload .upload-content .upload-content-right .upload-content-right-item{
     width: 120px;
@@ -241,7 +285,7 @@
   /*进度条*/
   #upload .upload-progress{
     width: 95%;
-    height: 10px;
+    height: 7px;
     position: absolute;
     bottom:10px;
     left:50%;
@@ -252,7 +296,7 @@
   }
   #upload .upload-progress-inner{
     width: 0;
-    height: 10px;
+    height: 7px;
     background: #48e119;
     transition: width .2s ease-in
   }
@@ -299,6 +343,7 @@
     font-size: 14px;
     cursor: pointer;
   }
+
   #upload .upload-content-right-top input{
     height: 32px;
     display: block;
@@ -317,5 +362,29 @@
   }
   #upload .upload-content-right-item-info div{
     margin-left: 5px;
+  }
+  #upload .upload-content-loading{
+    font-size: 0;
+    width: 37px;
+    height: 37px;
+    position: absolute;
+    top:0;
+    right:0;
+    left:0;
+    bottom:0;
+    margin:auto;
+  }
+  #upload .upload-content-no-pics{
+    width: 100px;
+    height: 40px;
+    line-height: 40px;
+    position: absolute;
+    top:0;
+    right:0;
+    left:0;
+    bottom:0;
+    margin:auto;
+    font-size: 20px;
+    color: #ccc;
   }
 </style>

@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var users = require('./routes/users');
 var upload = require('./routes/upload');
+var all = require('./routes/all');
 var app = express();
 var MongoClient = require("mongodb").MongoClient;
 var DB_CONN_STR = "mongodb://localhost:27017/database";
@@ -55,6 +56,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.use('/users', users);
 app.use('/upload', upload);
+app.use('/all', all);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
