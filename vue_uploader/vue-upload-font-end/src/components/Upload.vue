@@ -7,7 +7,8 @@
         </div>
         <div class="upload-content">
           <div class="upload-content-left">
-            <div class="upload-content-left-item" @click="menuSelect($event)" :class="{'upload-content-left-item-active':activeFlag===item}" v-for="item in menuData">{{item}}</div>
+            <div class="upload-content-left-item" @click="menuSelect($event,'new')" :class="{'upload-content-left-item-active':activeFlag==='new'}">上传图片</div>
+            <div class="upload-content-left-item" @click="menuSelect($event,item.mark)" :class="{'upload-content-left-item-active':activeFlag===item.mark}" v-for="item in menuData">{{item.name}}</div>
 
           </div>
           <div class="upload-content-right">
@@ -67,53 +68,64 @@
           progressShow:false,
           uploadLoading:false,
           noPic:false,
-          activeFlag:"",
-          menuData:['在线管理','分组一','分组二','分组三']
+          activeFlag:"new",
+          menuData:"",
+          group:"default"
         };
+      },
+      mounted(){
+          axios.get('/menudatas').then((response)=>{
+              let res = response.data;
+            console.log(res);
+            if(res.result){
+                  this.menuData = res.data;
+                  //this.group = res.data[0].data[0].mark
+              }
+          })
       },
       methods: {
         closePicBox(){
             this.$emit('close')
         },
-        menuSelect($event){
+        menuSelect($event,mark){
+          //点击设置分组、图片列表、加载图标
+          this.group = mark;
+          this.fileList = [];
           //设置按钮激活状态
-          this.activeFlag = $event.target.innerHTML;
-          if($event.target.innerHTML === '在线管理'){
-            this.uploadLoading = true;
-            axios.get('/all').then((response)=>{
-              let res = response.data;
-              this.uploadLoading = false;
-              if(res.result){
-                this.progressShow = false;
-                if(res.data.length !==0){
-                  this.noPic = false;
-                  this.fileList = res.data
-                }else{
-                  this.noPic = true;
-                }
-
-              }else{
-                this.noPic = true;
-                console.log(res.msg)
-              }
-            })
+          this.activeFlag = mark;
+          if(mark === 'new'){
+            this.fileList = [];
+            this.group = 'default';
+            return
           }
+          this.uploadLoading = true;
+          axios.get(`/query?mark=${this.group}`).then((response)=>{
+            let res = response.data;
+            this.uploadLoading = false;
+            if(res.result){
+              this.progressShow = false;
+                this.noPic = false;
+                this.fileList = res.data
+
+            }else{
+              this.noPic = true;
+            }
+          })
+
 
         },
         uploadImage($event){
-
           let file=$event.target,
           formData = new FormData();
           //递归调用自身，实现多文件依次上传
           let _this = this;
           let count = 0;
-
           let previewData = {};
           function upload(){
             //定义axios配置信息
             let config = {
               headers: {'Content-Type': 'multipart/form-data'},
-              onUploadProgress(progressEvent){
+              onUploadProgress (progressEvent){
                 if(progressEvent.lengthComputable){
                   _this.progress = progressEvent.total/progressEvent.loaded;
                   _this.$refs.progress[_this.$refs.progress.length-1].style.width = Number(_this.progress).toFixed(2)*100+"%"
@@ -121,9 +133,13 @@
               }
             };
             //向formData中插入文件
+
+            if(file.files[count]){
             formData.append('file',file.files[count],file.files[count].name);
             let fileReader = new FileReader();
+
             fileReader.readAsDataURL(file.files[count]);
+
             fileReader.onload=()=>{
               previewData = {
                 url:fileReader.result,
@@ -144,9 +160,17 @@
                 }
                 upload()
               }else{
+                  console.log(_this.group)
                   //发送数据
-                  axios.post('/upload',formData,config).then((response)=>{
+                  axios.post(`/upload?mark=${_this.group}`,formData,config).then((response)=>{
+
                     formData.delete('file');
+                    let res = response.data;
+                    if(!res.result){
+                        alert('上传失败');
+                        return;
+                    }
+                    _this.noPic = false;
                     count++;
                     if(count > file.files.length-1){
                       return
@@ -157,6 +181,7 @@
                   });
                 }
             };
+            }
           }
 
           //第一次调用
@@ -362,6 +387,12 @@
   }
   #upload .upload-content-right-item-info div{
     margin-left: 5px;
+  }
+  #upload .upload-content-right-item-info .upload-content-right-pic-name{
+    width: 120px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
   #upload .upload-content-loading{
     font-size: 0;
