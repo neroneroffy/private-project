@@ -27,24 +27,37 @@
                 暂无图片
               </div>
               <div class="upload-content-right-item-wrapper" v-for="(item,index) in fileList">
-                <div class="upload-content-right-item">
+                <div class="upload-content-right-item" @click="selectThis($event,item.id,index)">
                   <img :src=item.url alt="">
                   <div class="upload-progress" v-if="progressShow">
                     <div class="upload-progress-inner" ref="progress" :class="{'too-large':item.size>maxSize}"></div>
                   </div>
+                  <div class="upload-content-right-item-select-mark" v-if="item.isSelected"></div>
                 </div>
                 <div class="upload-content-right-item-info">
                   <div class="upload-content-right-pic-name">{{item.name}}</div>
                   <div class="upload-content-right-pic-size">{{item.size}}</div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
         <div class="uploader-bottom">
-          <div class="uploader-bottom-confirm">确定</div>
-          <div class="uploader-bottom-cancel" @click="closePicBox">取消</div>
+          <div class="uploader-bottom-pagination" v-if="pageShow">
+            <div class="uploader-bottom-pre" @click="lastPage">上一页</div>
+            <ul class="uploader-bottom-pagegroup">
+              <li class="uploader-bottom-page-item" :class="{'uploader-bottom-page-item-active':current==1}" @click="page($event)">1</li>
+              <li class="uploader-bottom-page-item" v-if="preClipped">...</li>
+              <li v-for="(item,index) in pageGroup" class="uploader-bottom-page-item" :class="{'uploader-bottom-page-item-active':current==item}" @click="page($event)">{{item}}</li>
+              <li class="uploader-bottom-page-item" v-if="backClipped">...</li>
+              <li class="uploader-bottom-page-item" :class="{'uploader-bottom-page-item-active':current==totalPage}" @click="page($event)" v-if="totalPage!==1">{{totalPage}}</li>
+            </ul>
+            <div class="uploader-bottom-next" @click="nextPage">下一页</div>
+          </div>
+          <div class="uploader-bottom-option">
+            <div class="uploader-bottom-confirm" @click="confirm">确定</div>
+            <div class="uploader-bottom-cancel" @click="closePicBox">取消</div>
+          </div>
         </div>
       </div>
       <div class="upload-modal" @click="closePicBox">
@@ -62,6 +75,7 @@
       data() {
         return {
           fileList:[],
+          selectedFileList:[],
           progress:0,
           tooLorge:false,
           maxSize :2*1024*1024,
@@ -70,7 +84,14 @@
           noPic:false,
           activeFlag:"new",
           menuData:"",
-          group:"default"
+          group:"default",
+          total:0,
+          pageSize:12,
+          current:1,
+          backClipped: true,
+          preClipped: false,
+          totalPage:0,
+          pageShow:false
         };
       },
       mounted(){
@@ -79,6 +100,7 @@
             console.log(res);
             if(res.result){
                   this.menuData = res.data;
+
                   //this.group = res.data[0].data[0].mark
               }
           })
@@ -87,30 +109,47 @@
         closePicBox(){
             this.$emit('close')
         },
-        menuSelect($event,mark){
-          //点击设置分组、图片列表、加载图标
-          this.group = mark;
-          this.fileList = [];
-          //设置按钮激活状态
-          this.activeFlag = mark;
-          if(mark === 'new'){
-            this.fileList = [];
-            this.group = 'default';
-            return
-          }
-          this.uploadLoading = true;
-          axios.get(`/query?mark=${this.group}`).then((response)=>{
+        getData(group,current,pageSize){
+
+          axios.get(`/query?mark=${group}&pageNum=${current}&pageSize=${pageSize}`).then((response)=>{
             let res = response.data;
+            this.total = res.total;
+            this.totalPage = Math.ceil(this.total/this.pageSize);
+
+            console.log(res)
             this.uploadLoading = false;
             if(res.result){
               this.progressShow = false;
-                this.noPic = false;
-                this.fileList = res.data
-
+              this.noPic = false;
+              this.fileList = res.data
             }else{
               this.noPic = true;
             }
           })
+        },
+
+        menuSelect($event,mark){
+          //点击设置分组、图片列表、加载图标
+          if(mark === 'new' ||mark === 'all' ){
+            this.group = 'default';
+          }else{
+            this.group = mark;
+          }
+          this.fileList = [];
+          //设置按钮激活状态
+          this.activeFlag = mark;
+          this.current = 1
+          if(mark === 'new'){
+            this.pageShow = false
+            this.fileList = [];
+            this.group = 'default';
+            return
+          }else{
+            this.pageShow = true
+            this.getData(this.group,this.current,this.pageSize)
+          }
+          this.uploadLoading = true;
+
 
 
         },
@@ -163,12 +202,14 @@
                   console.log(_this.group)
                   //发送数据
                   axios.post(`/upload?mark=${_this.group}`,formData,config).then((response)=>{
-
                     formData.delete('file');
                     let res = response.data;
-                    if(!res.result){
-                        alert('上传失败');
-                        return;
+                    if(res.result){
+                        _this.fileList = res.data;
+                    }else{
+                      alert('上传失败');
+                      return;
+
                     }
                     _this.noPic = false;
                     count++;
@@ -187,11 +228,92 @@
           //第一次调用
           upload();
           document.forms[0].target="rfFrame";
+        },
+        selectThis($event,id,index){
+          this.fileList[index].isSelected = !this.fileList[index].isSelected;
+        },
+        confirm(){
+            this.selectedFileList = [];
+            this.fileList.forEach((item)=>{
+                if(item.isSelected){
+
+                  this.selectedFileList.push(item.url)
+                }
+            });
+          console.log(this.selectedFileList)
+        },
+        lastPage(){
+            if(this.current>1){
+              this.current--;
+            }
+          this.getData(this.group,this.current,this.pageSize)
+        },
+        nextPage(){
+            if(this.current<=this.totalPage-1){
+              this.current++;
+            }
+            console.log(this.group)
+          this.getData(this.group,this.current,this.pageSize)
+
+            console.log(this.pageGroup)
+            console.log(`当前页------${this.current}`)
+            console.log(`总页数------${this.totalPage}`)
+        },
+        page($event){
+            this.current = Number($event.currentTarget.innerHTML);
+          console.log(`当前页------${this.current}`)
+          console.log(`总页数------${this.totalPage}`)
+          console.log(`总页数------${this.pageGroup}`)
+
+        }
+      },
+      computed:{
+        pageGroup(){
+            let pageLimit = [];
+            if(this.totalPage<=5){
+              this.preClipped = false;
+              this.backClipped = false
+              for(let i=2;i<this.totalPage;i++){
+                pageLimit.push(i)
+              }
+
+            }else{
+              this.backClipped = true;
+              if(this.current >=4){
+                if(this.current>=this.totalPage-3){
+                  pageLimit.push(this.totalPage-5);
+                  pageLimit.push(this.totalPage-4);
+                  pageLimit.push(this.totalPage-3);
+                  pageLimit.push(this.totalPage-2);
+                  pageLimit.push(this.totalPage-1);
+                  this.backClipped = false
+                }else{
+                  pageLimit.push(this.current-2);
+                  pageLimit.push(this.current-1);
+                  pageLimit.push(this.current);
+                  pageLimit.push(this.current+1);
+                  pageLimit.push(this.current+2);
+                  this.backClipped = true
+
+                }
+
+                this.preClipped = true;
+              }else{
+
+                this.preClipped = false;
+                for(let i=2;i<5;i++){
+                  pageLimit.push(i)
+                }
+              }
+            }
+            return pageLimit
         }
       }
+
     }
 </script>
 <style>
+
   #upload .upload-box{
     width: 800px;
     height: 600px;
@@ -203,6 +325,7 @@
     bottom:0;
     margin:auto;
     z-index: 9996;
+    user-select:none;
   }
   #upload .upload-modal{
     width: 100%;
@@ -231,12 +354,67 @@
   #upload .uploader-bottom{
     height: 60px;
     bottom:0;
-    display: flex;
-    justify-content: flex-end;
     align-items: center;
     border-top: 1px solid #e4e4e4;
   }
-  #upload .uploader-bottom div{
+  #upload .uploader-bottom:after{
+    clear: both;
+    content: "";
+    font-size: 0px;
+    display: block;
+  }
+  #upload .uploader-bottom .uploader-bottom-pagination{
+    margin-top: 14px;
+    padding-left: 20px;
+    float: left;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  #upload .uploader-bottom .uploader-bottom-pagegroup{
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    padding:0;
+    margin:0 10px
+  }
+  #upload .uploader-bottom .uploader-bottom-pagination>div{
+    width: 60px;
+    height: 30px;
+    border-radius: 4px;
+    border:1px solid #cbcbcb;
+    text-align: center;
+    line-height: 30px;
+    font-size: 15px;
+    cursor: pointer;
+    color: #6e6e6e;
+    display: inline-block;
+  }
+  #upload .uploader-bottom .uploader-bottom-pagegroup .uploader-bottom-page-item{
+
+    width: 30px;
+    height: 30px;
+    border:1px solid #cbcbcb;
+    color: #6e6e6e;
+    text-align: center;
+    line-height: 30px;
+    margin:0 3px;
+    font-size: 15px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  #upload .uploader-bottom .uploader-bottom-pagegroup .uploader-bottom-page-item-active{
+    background: #dcdcdc!important;
+  }
+  #upload .uploader-bottom .uploader-bottom-pagegroup li:hover{
+    background: #dcdcdc!important;
+  }
+  #upload .uploader-bottom .uploader-bottom-option{
+    float: right;
+    margin-top: 14px;
+  }
+  #upload .uploader-bottom .uploader-bottom-option div{
+    display: inline-block;
     width: 90px;
     height: 34px;
     font-size: 14px;
@@ -307,6 +485,41 @@
     margin:6px;
     cursor: pointer;
   }
+  #upload .upload-content .upload-content-right .upload-content-right-item-select-mark{
+    width: 0;
+    height: 0;
+    border-top: 35px solid #3eb5dd;
+    border-left: 35px solid transparent;
+    position: absolute;
+    right:0;
+    z-index: 9998;
+  }
+  #upload .upload-content .upload-content-right .upload-content-right-item-select-mark:before{
+    content: "";
+    width: 8px;
+    height: 3px;
+    display: block;
+    background: #fff;
+    border-radius: 3px;
+    transform: rotate(45deg);
+    position: absolute;
+    top:-24px;
+    left: -20px;
+    z-index: 9999;
+  }
+  #upload .upload-content .upload-content-right .upload-content-right-item-select-mark:after{
+    content: "";
+    width: 13px;
+    height: 3px;
+    display: block;
+    background: #fff;
+    border-radius: 3px;
+    transform: rotate(135deg);
+    position: absolute;
+    top:-25px;
+    right: 3px;
+    z-index: 9999;
+  }
   /*进度条*/
   #upload .upload-progress{
     width: 95%;
@@ -322,7 +535,7 @@
   #upload .upload-progress-inner{
     width: 0;
     height: 7px;
-    background: #48e119;
+    background: #3eb5dd;
     transition: width .2s ease-in
   }
   #upload .too-large{

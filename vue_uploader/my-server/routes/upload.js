@@ -57,7 +57,8 @@ router.post('/',(req,res,next)=>{
             id:`${new Date().getTime()}`,
             url:serverIp + newPath.substring(newPath.indexOf(fileDir)),
             name:file.name,
-            size:file.size
+            size:file.size,
+            isSelected:false
         };
         console.log(group);
         UploadData.findOne({group:group},(err,doc)=>{
@@ -79,9 +80,19 @@ router.post('/',(req,res,next)=>{
                             });
 
                         }else{
-
-                            return res.json({
-                                result:true,
+                            UploadData.findOne({group:group},(err,queryResult)=>{
+                                if(err){
+                                    return res.json({
+                                        result:false,
+                                        msg:err.message
+                                    });
+                                }else{
+                                    return res.json({
+                                        result:true,
+                                        data:queryResult.picList
+                                    })
+                                    console.log(queryResult.picList);
+                                }
                             });
 
                         }
