@@ -16,10 +16,7 @@ router.get('/',(req,res,next)=>{
         }else{
             let menuData = [];
             queryResult.forEach((item)=>{
-                menuData.push({
-                    name:item.name,
-                    mark:item.group
-                })
+                menuData.push(item)
             });
             res.json({
                 result:true,

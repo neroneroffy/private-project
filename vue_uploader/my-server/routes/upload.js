@@ -23,9 +23,12 @@ mongoose.connection.on('disconnected',()=>{
 });
 
 router.post('/',(req,res,next)=>{
-    //将图片插入数据库
-    let group = req.query.mark;//图片的分组标记
-
+    let group = '';
+    if(req.query.mark === 'new' || req.query.mark === 'all'){
+        group = 'default';//图片的分组标记
+    }else{
+        group = req.query.mark;//图片的分组标记
+    }
     let form = new Formidable.IncomingForm();
     form.encoding = 'utf-8';
     form.uploadDir = '/project/vue/vue_uploader/my-server/public/images';//定义文件存放地址
@@ -58,7 +61,8 @@ router.post('/',(req,res,next)=>{
             url:serverIp + newPath.substring(newPath.indexOf(fileDir)),
             name:file.name,
             size:file.size,
-            isSelected:false
+            isSelected:false,
+            newName:picName
         };
         console.log(group);
         UploadData.findOne({group:group},(err,doc)=>{
@@ -70,7 +74,7 @@ router.post('/',(req,res,next)=>{
             }else{
                 //console.log(doc);
                 if(doc){
-                    doc.picList.push(fileData);
+                    doc.picList.unshift(fileData);
 
                     doc.save((err,saveResult)=>{
 

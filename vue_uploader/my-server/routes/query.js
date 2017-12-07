@@ -7,51 +7,43 @@ let router = express.Router();
 let UploadData = require('../modules/uploadDatas');
 router.get('/',(req,res,next)=>{
     let group = req.query.mark;
-    let pageNum = Number(req.query.pageNum);
-    let pageSize =Number(req.query.pageSize);
-
-    console.log(`当前页${pageNum}`)
-    console.log(`每页多少条${pageSize}`)
+/*    let pageNum = Number(req.query.pageNum);
+    let pageSize =Number(req.query.pageSize);*/
     //如果传过来是all，那么查询所有分组
+    console.log(group);
     if(group === "all"){
-        let dataResult=null;
-        let total = null
-/*        Promise.all([
-            dataResult = UploadData.find({}).skip(pageNum).limit(pageSize),
-            UploadData.find({},(err,doc)=>{
-                total = doc.length
-            })
-        ]).then(()=>{
-            dataResult.exec((err,queryResult)=>{
-                if(err){
+        UploadData.find({},(err,queryResult)=>{
+            if(err){
+                res.json({
+                    result:false,
+                    mgs:'发生错误了'
+                })
+            }else{
+                let allPic = [];
+                queryResult.forEach((item)=>{
+                    allPic = allPic.concat(item.picList)
+                });
+                if(allPic.length === 0){
                     res.json({
                         result:false,
-                        msg:err.message
+                        msg:'暂无图片'
                     })
                 }else{
                     res.json({
                         result:true,
-                        data:queryResult,
-                        total:total
+                        data:allPic
                     })
-
-
-                    //console.log(queryResult)
                 }
-            })
-
-        })*/
-
+            }
+        })
+/*
         UploadData.find({},(err,queryResult)=>{
-            console.log('123')
             if(err){
-                console.log('456')
                 res.json({
                     result:false,
                     mgs:err.message
                 })
             }else{
-                console.log('789')
                 let allPic = [];
                 queryResult.forEach((item)=>{
                     allPic = allPic.concat(item.picList)
@@ -85,23 +77,32 @@ router.get('/',(req,res,next)=>{
 
             }
         })
+*/
+    }else if(group === "new"){
+        return
     }else{
-/*        let dataResult = UploadData.find({group:group}).skip(pageNum).limit(pageSize);
-        dataResult.exec((err,queryResult)=>{
+        UploadData.findOne({group:group},(err,queryResult)=>{
             if(err){
                 res.json({
                     result:false,
-                    msg:"查询失败"
+                    msg:err.message
                 })
             }else{
-                res.json({
-                    result:true,
-                    data:queryResult
-                })
+
+                if(queryResult.picList.length !==0){
+                    res.json({
+                        result:true,
+                        data:queryResult.picList,
+                    })
+                }else{
+                    res.json({
+                        result:false,
+                        msg:'暂无图片'
+                    })
+                }
             }
-        })*/
-        UploadData.findOne({group:group},(err,queryResult)=>{
-            console.log(88888);
+        })
+/*        UploadData.findOne({group:group},(err,queryResult)=>{
             if(err){
 
                 res.json({
@@ -138,7 +139,7 @@ router.get('/',(req,res,next)=>{
                     })
                 }
             }
-        })
+        })*/
 
     }
 });

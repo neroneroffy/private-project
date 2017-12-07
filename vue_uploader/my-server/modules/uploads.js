@@ -9,7 +9,8 @@ let uploadScheam = new Schema({
     'url':String,
     'size':Number,
     'name':String,
-    'isSelected':false
+    'isSelected':false,
+    'newName':String
 
 });
 module.exports = mongoose.model('Upload',uploadScheam);

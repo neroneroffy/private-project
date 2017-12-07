@@ -7,9 +7,26 @@
         </div>
         <div class="upload-content">
           <div class="upload-content-left">
-            <div class="upload-content-left-item" @click="menuSelect($event,'new')" :class="{'upload-content-left-item-active':activeFlag==='new'}">上传图片</div>
-            <div class="upload-content-left-item" @click="menuSelect($event,item.mark)" :class="{'upload-content-left-item-active':activeFlag===item.mark}" v-for="item in menuData">{{item.name}}</div>
-
+            <div class="upload-content-left-item upload-content-left-upload" @click="menuSelect($event,'new')" :class="{'upload-content-left-item-active':group==='new'}">上传图片</div>
+            <div class="upload-content-left-item-wrapper">
+              <div class="upload-content-left-item upload-content-left-group-item" @mouseenter="delGroupFlag = index" @mouseleave="delGroupFlag = ''" :class="{'upload-content-left-item-active':group===item.group}" v-for="(item,index) in menuData">
+                <span  @click="menuSelect($event,item.group)">{{item.name}}</span>
+                <span class="icon-cross" v-if="delGroupFlag === index" @click="delGroup(item.group)"></span>
+              </div>
+            </div>
+            <div class="upload-content-left-item upload-content-left-new" @click="newGroup">
+              <span class="icon-plus"></span>
+              新建分组
+            </div>
+            <div class="new-group" v-if="newGroupBox">
+              <div class="new-group-name">
+                <span>名称</span> <input type="text" v-model="groupName" >
+              </div>
+              <div class="new-group-btn">
+                <div class="new-group-confirm" @click="addGroup">确定</div>
+                <div class="new-group-cancel" @click="cancelAdd">取消</div>
+              </div>
+            </div>
           </div>
           <div class="upload-content-right">
             <form class="upload-content-right-top" enctype="multipart/form-data" ref="formSubmit" >
@@ -22,6 +39,10 @@
             <div class="upload-content-right-content">
               <div class="upload-content-loading" v-if="uploadLoading">
                 <img src="../assets/loading.gif" alt="">
+              </div>
+              <div class="upload-content-no-pics" v-if="group === 'new'">
+                <p>上传图片</p>
+                <p>图片将自动上传到默认分组</p>
               </div>
               <div class="upload-content-no-pics" v-if="noPic">
                 暂无图片
@@ -38,12 +59,15 @@
                   <div class="upload-content-right-pic-name">{{item.name}}</div>
                   <div class="upload-content-right-pic-size">{{item.size}}</div>
                 </div>
+                <div class="upload-content-right-item-del" title="删除" @click="delPic(item.id)">
+                  <span class="icon-cross"></span>
+                </div>
               </div>
             </div>
           </div>
         </div>
         <div class="uploader-bottom">
-          <div class="uploader-bottom-pagination" v-if="pageShow">
+          <!--<div class="uploader-bottom-pagination" v-if="pageShow">
             <div class="uploader-bottom-pre" @click="lastPage">上一页</div>
             <ul class="uploader-bottom-pagegroup">
               <li class="uploader-bottom-page-item" :class="{'uploader-bottom-page-item-active':current==1}" @click="page($event)">1</li>
@@ -53,7 +77,7 @@
               <li class="uploader-bottom-page-item" :class="{'uploader-bottom-page-item-active':current==totalPage}" @click="page($event)" v-if="totalPage!==1">{{totalPage}}</li>
             </ul>
             <div class="uploader-bottom-next" @click="nextPage">下一页</div>
-          </div>
+          </div>-->
           <div class="uploader-bottom-option">
             <div class="uploader-bottom-confirm" @click="confirm">确定</div>
             <div class="uploader-bottom-cancel" @click="closePicBox">取消</div>
@@ -69,6 +93,7 @@
 
 <script>
     import axios from 'axios';
+    import '../assets/style.css';
     export default {
         components:{
         },
@@ -82,76 +107,67 @@
           progressShow:false,
           uploadLoading:false,
           noPic:false,
-          activeFlag:"new",
           menuData:"",
-          group:"default",
-          total:0,
+          group:"new",
+          newGroupBox:false,
+          groupName:"",
+          delGroupFlag:""
+/*          total:0,
           pageSize:12,
           current:1,
           backClipped: true,
           preClipped: false,
           totalPage:0,
-          pageShow:false
+          pageShow:false*/
         };
       },
       mounted(){
           axios.get('/menudatas').then((response)=>{
-              let res = response.data;
+            let res = response.data;
             console.log(res);
             if(res.result){
-                  this.menuData = res.data;
-
-                  //this.group = res.data[0].data[0].mark
-              }
+                this.menuData = res.data;
+            }
           })
       },
       methods: {
         closePicBox(){
             this.$emit('close')
         },
-        getData(group,current,pageSize){
-
-          axios.get(`/query?mark=${group}&pageNum=${current}&pageSize=${pageSize}`).then((response)=>{
+        getData(group){
+        /*&pageNum=${current}&pageSize=${pageSize}*/
+          axios.get(`/query?mark=${group}`).then((response)=>{
             let res = response.data;
+/*
             this.total = res.total;
-            this.totalPage = Math.ceil(this.total/this.pageSize);
-
+            this.totalPage =this.total? Math.ceil(this.total/this.pageSize):1;
+*/
             console.log(res)
             this.uploadLoading = false;
             if(res.result){
               this.progressShow = false;
               this.noPic = false;
-              this.fileList = res.data
+              this.fileList = res.data;
             }else{
               this.noPic = true;
             }
           })
         },
 
-        menuSelect($event,mark){
+        menuSelect($event,group){
           //点击设置分组、图片列表、加载图标
-          if(mark === 'new' ||mark === 'all' ){
-            this.group = 'default';
-          }else{
-            this.group = mark;
-          }
           this.fileList = [];
           //设置按钮激活状态
-          this.activeFlag = mark;
-          this.current = 1
-          if(mark === 'new'){
-            this.pageShow = false
-            this.fileList = [];
-            this.group = 'default';
+          this.group = group;
+          //this.current = 1;
+          if(group === 'new'){
+            this.noPic = false;
             return
           }else{
-            this.pageShow = true
-            this.getData(this.group,this.current,this.pageSize)
+            //this.pageShow = true;
+            this.getData(this.group)
           }
           this.uploadLoading = true;
-
-
-
         },
         uploadImage($event){
           let file=$event.target,
@@ -160,6 +176,7 @@
           let _this = this;
           let count = 0;
           let previewData = {};
+
           function upload(){
             //定义axios配置信息
             let config = {
@@ -167,7 +184,8 @@
               onUploadProgress (progressEvent){
                 if(progressEvent.lengthComputable){
                   _this.progress = progressEvent.total/progressEvent.loaded;
-                  _this.$refs.progress[_this.$refs.progress.length-1].style.width = Number(_this.progress).toFixed(2)*100+"%"
+                  _this.$refs.progress[0].style.width = Number(_this.progress).toFixed(2)*100+"%";
+
                 }
               }
             };
@@ -185,10 +203,11 @@
                 name:file.files[count].name,
                 size:file.files[count].size,
               };
-              _this.fileList.push(previewData);
+              _this.fileList.unshift(previewData);
               _this.progressShow = true
             };
             fileReader.onloadend=()=>{
+              //console.log(`上传之前${JSON.stringify(_this.fileList)}`)
               //检测图片大小是否超出限制
               if(formData.get('file').size>_this.maxSize){
                 formData.delete('file');
@@ -199,13 +218,14 @@
                 }
                 upload()
               }else{
-                  console.log(_this.group)
+
                   //发送数据
                   axios.post(`/upload?mark=${_this.group}`,formData,config).then((response)=>{
                     formData.delete('file');
                     let res = response.data;
                     if(res.result){
                         _this.fileList = res.data;
+                      //console.log(`上传成功之后的${JSON.stringify(_this.fileList)}`)
                     }else{
                       alert('上传失败');
                       return;
@@ -232,6 +252,23 @@
         selectThis($event,id,index){
           this.fileList[index].isSelected = !this.fileList[index].isSelected;
         },
+        delPic(id){
+            axios.get('/deletepic',{
+                params:{
+                  mark:this.group,
+                  id:id
+                }}).then((response)=>{
+                let res = response.data;
+                if(res.result){
+                    this.fileList = res.data;
+                    if(this.fileList.length === 0){
+                        this.noPic = true;
+                    }
+                }else{
+                    alert('删除失败')
+                }
+            })
+        },
         confirm(){
             this.selectedFileList = [];
             this.fileList.forEach((item)=>{
@@ -242,6 +279,47 @@
             });
           console.log(this.selectedFileList)
         },
+        newGroup(){
+            this.newGroupBox = !this.newGroupBox
+        },
+        addGroup(){
+            if(this.groupName === ""){
+                alert('分组名称不能为空');
+                return
+            }
+            axios.post('/newgroup',{
+              name:this.groupName
+            }).then((response)=>{
+              let res = response.data;
+              if(res.result){
+                this.menuData = res.data;
+                this.newGroupBox = false;
+                this.groupName = ""
+              }
+            })
+        },
+        cancelAdd(){
+          this.newGroupBox = false;
+          this.groupName = ""
+        },
+        delGroup(group){
+          let msg = '删除分组，组内的所有图片将一同删除！';
+          if(confirm(msg) === true){
+            axios.post('/delgroup',{
+              group:group
+            }).then((response)=>{
+              let res = response.data;
+              console.log(res);
+              if(res.result){
+                this.menuData = res.data;
+                this.fileList = [];
+              }
+            })
+          }else{
+              return
+          }
+        }
+/*
         lastPage(){
             if(this.current>1){
               this.current--;
@@ -260,14 +338,17 @@
             console.log(`总页数------${this.totalPage}`)
         },
         page($event){
-            this.current = Number($event.currentTarget.innerHTML);
+          this.current = Number($event.currentTarget.innerHTML);
+          this.getData(this.group,this.current,this.pageSize)
           console.log(`当前页------${this.current}`)
           console.log(`总页数------${this.totalPage}`)
           console.log(`总页数------${this.pageGroup}`)
 
         }
+*/
       },
       computed:{
+/*
         pageGroup(){
             let pageLimit = [];
             if(this.totalPage<=5){
@@ -308,6 +389,7 @@
             }
             return pageLimit
         }
+*/
       }
 
     }
@@ -445,6 +527,68 @@
     height: 100%;
     width: 25%;
     border-right: 1px solid #e4e4e4;
+    position:relative;
+  }
+  #upload .upload-content .upload-content-left .new-group{
+
+    padding:20px;
+    background: #fff;
+    box-shadow: 1px 1px 5px 1px #ccc;
+    position: absolute;
+    bottom: 40px;
+    right:-180px;
+    z-index: 9999;
+  }
+  #upload .upload-content .upload-content-left .new-group .new-group-name{
+    margin-bottom: 20px;
+    text-align: right;
+  }
+  #upload .upload-content .upload-content-left .new-group .new-group-name span{
+    font-size: 15px;
+    color: #777777;
+    margin-right:10px
+  }
+  #upload .upload-content .upload-content-left .new-group .new-group-name input{
+    outline: none;
+    padding-left: 5px;
+    border:1px solid #ccc;
+    border-radius: 5px;
+    line-height: 30px;
+  }
+  #upload .upload-content .upload-content-left .upload-content-left-upload{
+    position: absolute;
+    top:0;
+    width: 90%;
+    border-bottom: 1px solid #e4e4e4;
+    background: #fff;
+    z-index: 9999;
+  }
+  #upload .upload-content .upload-content-left .upload-content-left-item-wrapper{
+    height: 412px;
+    padding:38px 0;
+    overflow: auto;
+  }
+  #upload .upload-content .upload-content-left .new-group .new-group-btn{
+   display: flex;
+    justify-content: flex-end;
+  }
+  #upload .upload-content .upload-content-left .new-group .new-group-btn div{
+    line-height: 30px;
+    text-align: center;
+    padding:0 10px;
+    font-size: 15px;
+    border-radius: 5px;
+    margin-left: 10px;
+  }
+  #upload .upload-content .upload-content-left .new-group .new-group-btn div:first-child{
+    background: #3eb5dd;
+    color: #fff;
+    cursor: pointer;
+  }
+  #upload .upload-content .upload-content-left .new-group .new-group-btn div:last-child{
+    color: #777777;
+    border:1px solid #ccc;
+    cursor: pointer;
   }
   #upload .upload-content .upload-content-right{
     width: 75%
@@ -456,8 +600,50 @@
     line-height: 38px;
     cursor: pointer;
   }
+  #upload .upload-content .upload-content-left .upload-content-left-item.upload-content-left-group-item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #upload .upload-content .upload-content-left .upload-content-left-new{
+    width: 90%;
+    position: absolute;
+    bottom:0;
+    border-top: 1px solid #e4e4e4;
+    background: #fff;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+  }
+  #upload .upload-content .upload-content-left .upload-content-left-new span{
+    font-size: 15px;
+    color: #929292;
+  }
+  #upload .upload-content .upload-content-left .upload-content-left-item span:nth-child(1){
+    display: block;
+    height: 38px;
+    width: 80%;
+  }
+  .upload-content-left-item span:nth-child(2){
+    display: block;
+    width: 20%;
+    height: 38px;
+    line-height: 38px;
+    font-size: 12px;
+    color: #777777;
+    padding-right: 10px;
+    text-align: right;
+
+  }
   #upload .upload-content .upload-content-left .upload-content-left-item-active{
     background: #f2f2f2;
+  }
+  #upload .upload-content .upload-content-left .upload-content-left-new span:nth-child(1){
+    width: 15%;
+    line-height: 38px;
+  }
+  #upload .upload-content .upload-content-left .upload-content-left-new span:nth-child(2){
+    width: 85%;
   }
   #upload .upload-content .upload-content-left .upload-content-left-item:hover{
     background: #f2f2f2;
@@ -485,13 +671,34 @@
     margin:6px;
     cursor: pointer;
   }
+  #upload .upload-content .upload-content-right .upload-content-right-item-del{
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 50%;
+    color: #fff;
+    background: #ccc;
+    position: absolute;
+    right:-3px;
+    top:-3px;
+    z-index: 9998;
+    cursor:pointer;
+  }
+  #upload .upload-content .upload-content-right .upload-content-right-item-del:hover{
+    background: #3eb5dd;
+  }
+  #upload .upload-content .upload-content-right .upload-content-right-item-del .icon-cross{
+    line-height: 20px;
+  }
   #upload .upload-content .upload-content-right .upload-content-right-item-select-mark{
     width: 0;
     height: 0;
     border-top: 35px solid #3eb5dd;
-    border-left: 35px solid transparent;
+    border-right: 35px solid transparent;
     position: absolute;
-    right:0;
+    left:0;
     z-index: 9998;
   }
   #upload .upload-content .upload-content-right .upload-content-right-item-select-mark:before{
@@ -504,7 +711,7 @@
     transform: rotate(45deg);
     position: absolute;
     top:-24px;
-    left: -20px;
+    left: 4px;
     z-index: 9999;
   }
   #upload .upload-content .upload-content-right .upload-content-right-item-select-mark:after{
@@ -517,7 +724,7 @@
     transform: rotate(135deg);
     position: absolute;
     top:-25px;
-    right: 3px;
+    right: -21px;
     z-index: 9999;
   }
   /*进度条*/
@@ -545,6 +752,7 @@
   }
   #upload .upload-content-right-item-wrapper{
     margin-bottom: 10px;
+    position: relative;
   }
   #upload .upload-content .upload-content-right .upload-content-right-item:hover img{
     opacity: 0.8;
@@ -619,9 +827,9 @@
     margin:auto;
   }
   #upload .upload-content-no-pics{
-    width: 100px;
+
     height: 40px;
-    line-height: 40px;
+    line-height: 28px;
     position: absolute;
     top:0;
     right:0;
@@ -630,5 +838,12 @@
     margin:auto;
     font-size: 20px;
     color: #ccc;
+
+  }
+  #upload .upload-content-no-pics p{
+    margin:0
+  }
+  #upload .upload-content-no-pics p:nth-child(2){
+    font-size: 14px;
   }
 </style>

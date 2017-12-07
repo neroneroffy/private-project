@@ -9,6 +9,9 @@ var users = require('./routes/users');
 var upload = require('./routes/upload');
 var query = require('./routes/query');
 var menuDatas = require('./routes/menudata');
+var deletePic = require('./routes/delete');
+var newGroup = require('./routes/newGroup');
+var delGroup = require('./routes/delGroup');
 var app = express();
 var MongoClient = require("mongodb").MongoClient;
 var DB_CONN_STR = "mongodb://localhost:27017/database";
@@ -33,6 +36,10 @@ app.use('/users', users);
 app.use('/upload', upload);
 app.use('/query', query);
 app.use('/menudatas', menuDatas);
+app.use('/deletepic', deletePic);
+app.use('/newgroup', newGroup);
+app.use('/delgroup', delGroup);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
