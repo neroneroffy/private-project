@@ -1,4 +1,4 @@
-﻿# 个人练习项目
+﻿# 练习
 
 ## vue.js + node.js + MongoDB 商城实现（练习项目）
 技术：Vue2.5.2, Vue-Router, Vuex, Node.js, Express, MongoDB, WebPack
