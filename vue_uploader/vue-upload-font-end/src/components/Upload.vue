@@ -33,7 +33,7 @@
               <label class="upload-content-right-top-btn">
                 上传图片
               </label>
-              <input type="file" @change="uploadImage($event)" multiple="multiple">
+              <input type="file" @change="uploadImage($event)" multiple="multiple" accept="image/gif, image/jpeg, image/png">
             </form>
             <iframe id="rfFrame" name="rfFrame" src="about:blank" style="display:none;"></iframe>
             <div class="upload-content-right-content" ref="picWrapper">
