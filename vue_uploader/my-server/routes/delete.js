@@ -10,8 +10,12 @@ router.get('/',(req,res,next)=>{
     let group = req.param('mark');
     let id = req.param('id');
     console.log(group);
+    if(group === 'new'){
+        group = 'default'
+    }
     console.log(id);
-    if(group === "all") {
+
+/*
         UploadData.find({}, (err, queryResult) => {
             if (err) {
                 res.json({
@@ -29,11 +33,8 @@ router.get('/',(req,res,next)=>{
                         allPic.splice(index,1)
                     }
                 });
-
-                res.json({
-                    result: true,
-                    data: allPic
-                });
+                console.log(queryResult)
+                for(let i=0;i<queryResult.length;i++){}
                 queryResult.save((err,saveResult)=>{
                     if(err){
                         res.json({
@@ -43,16 +44,16 @@ router.get('/',(req,res,next)=>{
                     }else{
                         res.json({
                             result: true,
-                            data: queryResult.picList
+                            data: allPic
                         })
-
                     }
                 });
 
 
             }
         })
-    }else{
+*/
+
         UploadData.findOne({group:group},(err,queryResult)=>{
             if(err){
                 res.json({
@@ -67,6 +68,7 @@ router.get('/',(req,res,next)=>{
 
                     }
                 });
+
                 queryResult.save((err,saveResult)=>{
                     if(err){
                         res.json({
@@ -85,6 +87,6 @@ router.get('/',(req,res,next)=>{
             }
         })
 
-    }
+
 });
 module.exports = router;

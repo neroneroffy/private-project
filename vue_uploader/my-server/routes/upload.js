@@ -23,7 +23,7 @@ mongoose.connection.on('disconnected',()=>{
 });
 
 router.post('/',(req,res,next)=>{
-    let group = '';
+    let groupMark = req.query.mark;
     if(req.query.mark === 'new' || req.query.mark === 'all'){
         group = 'default';//图片的分组标记
     }else{
@@ -40,8 +40,9 @@ router.post('/',(req,res,next)=>{
     let fileDir = "images";//定义文件的存放路径
     let route = 'upload_';//定义路由
     let serverIp = 'http://localhost:3002/';//定义服务器IP
-
+    let newPic = [];
     function handleFile (file){
+
         let filename = file.name;
         let nameArray = filename.split('.');
         let type = nameArray[nameArray.length-1];
@@ -62,9 +63,8 @@ router.post('/',(req,res,next)=>{
             name:file.name,
             size:file.size,
             isSelected:false,
-            newName:picName
+            newName:picName,
         };
-        console.log(group);
         UploadData.findOne({group:group},(err,doc)=>{
             if(err){
                 res.json({
@@ -72,33 +72,72 @@ router.post('/',(req,res,next)=>{
                     msg:err.message
                 })
             }else{
-                //console.log(doc);
                 if(doc){
-                    doc.picList.unshift(fileData);
-
+                    doc.picList.push(fileData);
                     doc.save((err,saveResult)=>{
 
                         if(err){
                             return res.json({
                                 result:false,
                             });
-
                         }else{
-                            UploadData.findOne({group:group},(err,queryResult)=>{
-                                if(err){
-                                    return res.json({
-                                        result:false,
-                                        msg:err.message
-                                    });
-                                }else{
-                                    return res.json({
-                                        result:true,
-                                        data:queryResult.picList
-                                    })
-                                    console.log(queryResult.picList);
-                                }
-                            });
+                            let length= doc.picList.length;
+                            console.log(doc.picList.length)
+                            if(groupMark === 'all'){
+                                UploadData.find({},(err,queryResult)=>{
+                                    if(err){
+                                        res.json({
+                                            result:false,
+                                            mgs:'发生错误了'
+                                        })
+                                    }else{
+                                        let allPic = [];
+                                        queryResult.forEach((item)=>{
+                                            if(item.group !=='default'){
+                                                allPic = allPic.concat(item.picList)
+                                            }
+                                        });
+                                            res.json({
+                                                result:true,
+                                                data:allPic.concat(queryResult[1].picList)
+                                            })
 
+                                    }
+                                })
+                            }else if(groupMark === 'new'){
+
+                                UploadData.findOne({group:'default'},(err,queryResult)=>{
+                                    if(err){
+                                        return res.json({
+                                            result:false,
+                                            msg:err.message
+                                        });
+                                    }else{
+
+                                        console.log(queryResult.picList[queryResult.picList.length - 1]);
+                                        return res.json({
+                                            result:true,
+                                            data:queryResult.picList[queryResult.picList.length-1]
+                                        })
+                                    }
+                                });
+
+                            }else{
+                                UploadData.findOne({group:group},(err,queryResult)=>{
+                                    if(err){
+                                        return res.json({
+                                            result:false,
+                                            msg:err.message
+                                        });
+                                    }else{
+                                        return res.json({
+                                            result:true,
+                                            data:queryResult.picList
+                                        })
+                                        console.log(queryResult.picList);
+                                    }
+                                });
+                            }
                         }
                     })
 
@@ -120,11 +159,6 @@ router.post('/',(req,res,next)=>{
         }
 
     });
-    form.on('end',()=>{
-
-
-    });
-
 
 });
 /*router.post('/',(req,res,next)=>{

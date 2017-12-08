@@ -21,19 +21,17 @@ router.get('/',(req,res,next)=>{
             }else{
                 let allPic = [];
                 queryResult.forEach((item)=>{
-                    allPic = allPic.concat(item.picList)
+                    if(item.group !=='default'){
+                        allPic = allPic.concat(item.picList)
+                    }
                 });
-                if(allPic.length === 0){
-                    res.json({
-                        result:false,
-                        msg:'暂无图片'
-                    })
-                }else{
+                //allPic.concat(queryResult[1].picList)
+
                     res.json({
                         result:true,
-                        data:allPic
+                        data:allPic.concat(queryResult[1].picList)
                     })
-                }
+
             }
         })
 /*

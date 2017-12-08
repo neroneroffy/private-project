@@ -3,7 +3,7 @@
       <div class="upload-box">
         <div class="upload-header">
           <div class="upload-header-title">选择图片</div>
-          <div class="upload-header-close" @click="closePicBox">X</div>
+          <div class="upload-header-close" @click="closePicBox"><span class="icon-cross"></span></div>
         </div>
         <div class="upload-content">
           <div class="upload-content-left">
@@ -11,7 +11,7 @@
             <div class="upload-content-left-item-wrapper">
               <div class="upload-content-left-item upload-content-left-group-item" @mouseenter="delGroupFlag = index" @mouseleave="delGroupFlag = ''" :class="{'upload-content-left-item-active':group===item.group}" v-for="(item,index) in menuData">
                 <span  @click="menuSelect($event,item.group)">{{item.name}}</span>
-                <span class="icon-cross" v-if="delGroupFlag === index" @click="delGroup(item.group)"></span>
+                <span class="icon-cross" v-if="delGroupFlag === index && item.group!=='all'&& item.group!=='default'" @click="delGroup(item.group)"></span>
               </div>
             </div>
             <div class="upload-content-left-item upload-content-left-new" @click="newGroup">
@@ -36,11 +36,12 @@
               <input type="file" @change="uploadImage($event)" multiple="multiple">
             </form>
             <iframe id="rfFrame" name="rfFrame" src="about:blank" style="display:none;"></iframe>
-            <div class="upload-content-right-content">
+            <div class="upload-content-right-content" ref="picWrapper">
+
               <div class="upload-content-loading" v-if="uploadLoading">
                 <img src="../assets/loading.gif" alt="">
               </div>
-              <div class="upload-content-no-pics" v-if="group === 'new'">
+              <div class="upload-content-no-pics" v-if="newUpload">
                 <p>上传图片</p>
                 <p>图片将自动上传到默认分组</p>
               </div>
@@ -49,17 +50,20 @@
               </div>
               <div class="upload-content-right-item-wrapper" v-for="(item,index) in fileList">
                 <div class="upload-content-right-item" @click="selectThis($event,item.id,index)">
+                  <!--预览图-->
                   <img :src=item.url alt="">
+                  <!--进度条-->
                   <div class="upload-progress" v-if="progressShow">
                     <div class="upload-progress-inner" ref="progress" :class="{'too-large':item.size>maxSize}"></div>
                   </div>
+                  <!--选择标志-->
                   <div class="upload-content-right-item-select-mark" v-if="item.isSelected"></div>
                 </div>
                 <div class="upload-content-right-item-info">
                   <div class="upload-content-right-pic-name">{{item.name}}</div>
                   <div class="upload-content-right-pic-size">{{item.size}}</div>
                 </div>
-                <div class="upload-content-right-item-del" title="删除" @click="delPic(item.id)">
+                <div class="upload-content-right-item-del" title="删除" @click="delPic(item.id)" v-if="group !== 'all'">
                   <span class="icon-cross"></span>
                 </div>
               </div>
@@ -101,7 +105,7 @@
         return {
           fileList:[],
           selectedFileList:[],
-          progress:0,
+          //progress:0,
           tooLorge:false,
           maxSize :2*1024*1024,
           progressShow:false,
@@ -111,7 +115,11 @@
           group:"new",
           newGroupBox:false,
           groupName:"",
-          delGroupFlag:""
+          delGroupFlag:"",
+          couldDel:true,
+          newUpload:true,
+          newPicList:[]
+
 /*          total:0,
           pageSize:12,
           current:1,
@@ -124,7 +132,6 @@
       mounted(){
           axios.get('/menudatas').then((response)=>{
             let res = response.data;
-            console.log(res);
             if(res.result){
                 this.menuData = res.data;
             }
@@ -132,7 +139,7 @@
       },
       methods: {
         closePicBox(){
-            this.$emit('close')
+            this.$emit('close',"")
         },
         getData(group){
         /*&pageNum=${current}&pageSize=${pageSize}*/
@@ -142,7 +149,6 @@
             this.total = res.total;
             this.totalPage =this.total? Math.ceil(this.total/this.pageSize):1;
 */
-            console.log(res)
             this.uploadLoading = false;
             if(res.result){
               this.progressShow = false;
@@ -157,14 +163,18 @@
         menuSelect($event,group){
           //点击设置分组、图片列表、加载图标
           this.fileList = [];
+          this.uploadedCount = 0;
           //设置按钮激活状态
           this.group = group;
+
           //this.current = 1;
           if(group === 'new'){
             this.noPic = false;
+            this.newUpload = true;
             return
           }else{
             //this.pageShow = true;
+            this.newUpload = false;
             this.getData(this.group)
           }
           this.uploadLoading = true;
@@ -178,19 +188,22 @@
           let previewData = {};
 
           function upload(){
+            //开始上传时，滚到底部
+            _this.$refs.picWrapper.scrollTop = _this.$refs.picWrapper.scrollHeight;
             //定义axios配置信息
+            let progress = 0;
             let config = {
               headers: {'Content-Type': 'multipart/form-data'},
               onUploadProgress (progressEvent){
+                console.log(`进度条的数量${_this.$refs.progress.length -1}`);
                 if(progressEvent.lengthComputable){
-                  _this.progress = progressEvent.total/progressEvent.loaded;
-                  _this.$refs.progress[0].style.width = Number(_this.progress).toFixed(2)*100+"%";
-
+                  progress = progressEvent.total/progressEvent.loaded;
+                  //进度条
+                  _this.$refs.progress[_this.$refs.progress.length-1].style.width = Number(progress).toFixed(2)*100+"%";
                 }
               }
             };
             //向formData中插入文件
-
             if(file.files[count]){
             formData.append('file',file.files[count],file.files[count].name);
             let fileReader = new FileReader();
@@ -203,11 +216,10 @@
                 name:file.files[count].name,
                 size:file.files[count].size,
               };
-              _this.fileList.unshift(previewData);
+              _this.fileList.push(previewData);
               _this.progressShow = true
             };
             fileReader.onloadend=()=>{
-              //console.log(`上传之前${JSON.stringify(_this.fileList)}`)
               //检测图片大小是否超出限制
               if(formData.get('file').size>_this.maxSize){
                 formData.delete('file');
@@ -218,14 +230,28 @@
                 }
                 upload()
               }else{
-
                   //发送数据
                   axios.post(`/upload?mark=${_this.group}`,formData,config).then((response)=>{
                     formData.delete('file');
                     let res = response.data;
+                    console.log(res);
                     if(res.result){
-                        _this.fileList = res.data;
-                      //console.log(`上传成功之后的${JSON.stringify(_this.fileList)}`)
+
+                      console.log(_this.newPicList);
+                      if(_this.group === 'new'){
+                        _this.fileList.push(res.data);
+
+                          _this.fileList.forEach((item,index)=>{
+                              if(!item.newName){
+                                _this.fileList.splice(index,1)
+                              }
+                          })
+
+                        }else{
+                          _this.fileList = res.data;
+                        }
+
+                      _this.newUpload = false
                     }else{
                       alert('上传失败');
                       return;
@@ -238,7 +264,7 @@
                     }
                     upload()
                   }).catch((err)=>{
-                    console.log(err)
+                    alert('上传失败123');
                   });
                 }
             };
@@ -253,31 +279,38 @@
           this.fileList[index].isSelected = !this.fileList[index].isSelected;
         },
         delPic(id){
-            axios.get('/deletepic',{
+            //防止用户多次点击导致没有删除文件再次发起请求后台报错
+            if(this.couldDel){
+              this.couldDel = false;
+              if(this.group === 'all'){
+                this.group = 'default'
+              }
+              axios.get('/deletepic',{
                 params:{
                   mark:this.group,
                   id:id
                 }}).then((response)=>{
                 let res = response.data;
                 if(res.result){
-                    this.fileList = res.data;
-                    if(this.fileList.length === 0){
-                        this.noPic = true;
-                    }
+                  this.couldDel = true;
+                  this.fileList = res.data;
+                  if(this.fileList.length === 0){
+                    this.noPic = true;
+                  }
                 }else{
-                    alert('删除失败')
+                  alert('删除失败')
                 }
-            })
+              })
+            }
         },
         confirm(){
             this.selectedFileList = [];
             this.fileList.forEach((item)=>{
                 if(item.isSelected){
-
-                  this.selectedFileList.push(item.url)
+                  this.selectedFileList.push(item)
                 }
             });
-          console.log(this.selectedFileList)
+          this.$emit('close',this.selectedFileList)
         },
         newGroup(){
             this.newGroupBox = !this.newGroupBox
@@ -309,7 +342,6 @@
               group:group
             }).then((response)=>{
               let res = response.data;
-              console.log(res);
               if(res.result){
                 this.menuData = res.data;
                 this.fileList = [];
@@ -432,6 +464,7 @@
   #upload .upload-header-close{
     padding:0 20px;
     cursor: pointer;
+    color: #9d9d9d;
   }
   #upload .uploader-bottom{
     height: 60px;
