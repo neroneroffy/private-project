@@ -27,5 +27,7 @@ Vue搭建页面，form绑定一个不可见的iframe实现无刷新提交表单�
 * 新建分组，删除分组
 * 删除图片
 * 选择图片
+
 效果：
+
 ![image](https://github.com/capslocktao/private-project/blob/master/vue_uploader/show.gif)
