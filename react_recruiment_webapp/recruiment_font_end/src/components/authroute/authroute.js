@@ -2,7 +2,13 @@ import React, {Component} from 'react';
 import axios from 'axios';
 //由于authroute组件不是路由组件，所以要引入withRouter，获取路由对象
 import { withRouter } from 'react-router-dom';
+import { userInfo } from '../../redux/user.redux';
+import { connect } from 'react-redux';
 @withRouter
+@connect(
+    null,
+    {userInfo}
+)
 class Authroute extends Component {
     constructor(props) {
         super(props)
@@ -16,10 +22,13 @@ class Authroute extends Component {
             return null;
         }else{
             axios.get('/users/info').then((response)=>{
+                let res = response.data;
+                console.log(res)
                 if(response.status === 200){
-                    let res = response.data;
                     if(res.code === 1){
-                       // this.props.history.push('/login')
+                       this.props.history.push('/login')
+                    }else{
+                       this.props.userInfo(res.data.data)
                     }
                 }
             })
