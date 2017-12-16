@@ -1,6 +1,6 @@
-﻿﻿# 练习
+﻿﻿﻿# 练习
 
-## vue.js + node.js + MongoDB 商城实现
+## vue.js + node.js + MongoDB 商城(vue_shop)
 >技术：Vue2.5.2, Vue-Router, Vuex, Node.js, Express, MongoDB, WebPack
 
 前端页面使用vue构建，不再mock数据，后端服务器由Node.js的Express框架搭建，数据库为MongoDB，网络请求为axios。
@@ -16,7 +16,7 @@
 
 ![image](https://github.com/capslocktao/private-project/blob/master/vue_shop/vueshop_pic.png)
 
-## vue.js + node.js + MongoDB 上传图片组件
+## vue.js + node.js + MongoDB 上传图片组件(vue_uploader)
 >技术：Vue2.5.2, Node.js, Express, MongoDB, WebPack
 
 Vue搭建页面，form绑定一个不可见的iframe实现无刷新提交表单，图片选择完毕后，递归调用axios将所选图片依次post到后台，实现单图和多图的上传功能，并实现图片预览、进度条、检测图片大小是否超出限制（前端检测）。
@@ -34,3 +34,34 @@ Vue搭建页面，form绑定一个不可见的iframe实现无刷新提交表单�
 效果：
 
 ![image](https://github.com/capslocktao/private-project/blob/master/vue_uploader/show.gif)
+
+
+## Vue.js饿了么商家模块(ele)
+>技术：vue2，vue-resource，vue-router，better-scroll，stylus
+
+纯前端练习，三个业务模块：商品，评论，商家。通过vue-resource请求mock数据，引入better-scroll实现页面内所有滚动效果，动画效果通过transition组件实现。flex进行页面布局。
+
+功能：
+
+* 点击分类目录滚动到相应商品模块
+* 购物车数量及商品变化实时计算价格
+* 评论筛选（全部、推荐、吐槽、有无内容）
+* localStorage实现收藏商家功能
+* 评价星级根据数据动态变化
+
+效果：
+
+![image](https://github.com/capslocktao/private-project/blob/master/ele/ele_show.gif)
+
+
+## React + Node.js +  MongoDB实时聊天WebApp (react_recruiment_webapp)
+>技术：React16，React-Router4，Redux，Node.js，MongoDB，Antd-Mobile
+
+React实战项目，重点练习Redux的运用，利用thunk实现Redux异步操作，Socket.io实现两个用户角色实时通信。
+功能：
+
+* 用户的注册登录
+* 根据不同角色跳转到不同页面
+* 实时聊天
+
+其余功能开发中...
