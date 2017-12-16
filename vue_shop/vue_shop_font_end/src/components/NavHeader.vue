@@ -80,6 +80,7 @@
     },
     computed:{
         nickName(){
+
           return this.$store.state.nickName;
         },
         cartCount(){
@@ -123,8 +124,9 @@
               let res = response.data;
 
               if(res.status ==="0"){
+                console.log(document.cookie);
                 //this.nickName = document.cookie.split(';')[1].split("=")[1];
-                this.$store.commit("updateUserInfo",document.cookie.split(';')[1].split("=")[1]);
+                this.$store.commit("updateUserInfo",document.cookie.split(';')[0].split("=")[1]);
                 this.hasLogin = true;
                 this.errorTip = false;
                 this.showModal = false;

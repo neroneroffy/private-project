@@ -42,6 +42,7 @@ router.get('/list',(req,res,next)=>{
             }
         };
     }
+
     let goodsModal = Goods.find(params).skip(skip).limit(pageSize);//分页查询，跳过多少条
 
     goodsModal.sort({'salePrice':sort});

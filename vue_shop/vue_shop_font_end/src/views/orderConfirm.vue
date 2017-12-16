@@ -167,6 +167,7 @@
             })
         },
         payMent(){
+            alert('确认支付')
             let addressId = this.$route.query.addressId;
           axios.post('/users/payMent',{
               addressId:addressId,
