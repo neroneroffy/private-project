@@ -26,5 +26,5 @@ npm run build
 
 ```
 ## 效果
-![image](https://github.com/capslocktao/private-project/blob/master/vue_uploader/show.gif)
+![image](https://github.com/capslocktao/private-project/blob/master/ele/ele_show.gif)
 
