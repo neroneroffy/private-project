@@ -1,6 +1,6 @@
 # Vue.js饿了么商家模块
 
-> 技术：vue2，vue-resource，vue-router，better-scroll,stylus
+> 技术：vue2，vue-resource，vue-router，better-scroll，stylus
 
 纯前端项目练习，三个业务模块：商品，评论，商家。通过vue-resource请求mock数据，引入better-scroll实现页面内所有滚动效果，动画效果通过transition组件实现。flex进行页面布局。
 ## 功能
