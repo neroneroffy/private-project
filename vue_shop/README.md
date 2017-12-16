@@ -1,18 +1,19 @@
-# Vue.js饿了么商家模块
+# Vue.js+Node.js+MongoDB商城
 
-> 技术：vue2，vue-resource，vue-router，better-scroll,stylus
+> 技术：vue2，axios，vue-router，Node.js，MongoDB，WebPack，EXpress
 
-纯前端项目练习，三个业务模块：商品，评论，商家。通过vue-resource请求mock数据，引入better-scroll实现页面内所有滚动效果，动画效果通过transition组件实现。flex进行页面布局。
+前端页面使用vue构建，后端服务器由Node.js的Express框架搭建，数据库为MongoDB，网络请求为axios。
+
+功能：
 ## 功能
-* 点击分类目录滚动到相应商品模块
-* 路由切换动画
-* 购物车数量及商品变化实时计算价格
-* 评论筛选（全部、推荐、吐槽、有无内容）
-* localStorage实现收藏商家功能
-* 评价星级根据数据动态变化
+* 登录退出
+* 商品列表（分页请求，并可以加入购物车）
+* 购物车（商品数量的加减，商品的删除，多选全选反选价格联动）
+* 地址模块（设置默认地址，删除）、订单生成（生成订单号，收货人信息，并插入数据库）
 
 
 ## 说明
+> 分别进入vue_shop_font_end和vue_shop_font_end安装依赖、启动项目
 
 ``` bash
 # 安装依赖
@@ -26,5 +27,5 @@ npm run build
 
 ```
 ## 效果
-![image](https://github.com/capslocktao/private-project/blob/master/ele/ele_show.gif)
+![image](https://github.com/capslocktao/private-project/blob/master/vue_shop/vueshop_shop.gif)
 
