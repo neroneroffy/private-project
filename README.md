@@ -1,5 +1,4 @@
-﻿﻿﻿# 练习
-
+﻿
 ## vue.js + node.js + MongoDB 商城(vue_shop)
 >技术：Vue2.5.2, Vue-Router, Vuex, Node.js, Express, MongoDB, WebPack
 
