@@ -6,25 +6,21 @@ import {getRedirectToUrl} from '../util/util';
 import { Toast } from 'antd-mobile'
 const initialState = {
     redirectTo:"",
-    isAuth:false,
     user:"",
     pwd:"",
     repeatPwd:"",
     type:"",
     msg:""
 };
-const REGISTER_SUCCESS = "REGISTER_SUCCESS";
-const LOGIN_SUCCESS = "LOGIN_SUCCESS";
+
+const AUTH_SUCCESS = "AUTH_SUCCESS";
 const ERROR_MSG = "ERROR_MSG";
 const LOAD_DATA = "LOAD_DATA";
 //reducer
 export function user (state = initialState,action) {
-
     switch (action.type){
-        case REGISTER_SUCCESS://根据返回来的信息，给state赋值
-            return {...state,msg:'',redirectTo:getRedirectToUrl(action.payload),isAuth:true,...action.payload};
-        case LOGIN_SUCCESS://根据返回来的信息，给state赋值
-            return {...state,msg:'',redirectTo:getRedirectToUrl(action.payload),isAuth:true,...action.payload};
+        case AUTH_SUCCESS://根据返回来的信息，给state赋值
+            return {...state,msg:'',redirectTo:getRedirectToUrl(action.payload),...action.payload};
         case LOAD_DATA:
             return {...state,...action.payload};
         case ERROR_MSG:
@@ -42,15 +38,11 @@ function errorMsg(msg) {
         type:ERROR_MSG
     }
 }
-function registerSuccess(data) {
+//登录，注册，完善信息都dispatch这个action
+function authSuccess(obj) {
+    const {pwd,...data} = obj;
     return {
-        type:REGISTER_SUCCESS,
-        payload:data
-    }
-}
-function loginSuccess(data) {
-    return {
-        type:LOGIN_SUCCESS,
+        type:AUTH_SUCCESS,
         payload:data
     }
 }
@@ -76,7 +68,7 @@ export function register ({user,pwd,repeatPwd,type}) {
         }).then(res=>{
             if(res.status === 200){
                 if(res.data.code === 0){
-                    dispatch(registerSuccess({user,pwd,type}))
+                    dispatch(authSuccess({user,pwd,type}))
                 }else{
                     if(res.data.msg){
                         Toast.info(res.data.msg, 1);
@@ -88,7 +80,6 @@ export function register ({user,pwd,repeatPwd,type}) {
     }
 
 }
-
 
 //登录
 export function login({user,pwd}) {
@@ -102,9 +93,9 @@ export function login({user,pwd}) {
         }).then(res=>{
             if(res.status === 200){
                 if(res.data.code === 0){
-                    dispatch(loginSuccess({user,pwd}))
+                    dispatch(authSuccess(res.data.data))
                 }else{
-                    console.log(res.data)
+
                     if(res.data.msg){
                         Toast.info(res.data.msg, 1);
                         dispatch(errorMsg(res.data.msg))
@@ -114,7 +105,28 @@ export function login({user,pwd}) {
             }
         })
     }
+}
 
+//完善信息
+export function update(data) {
+
+    return dispatch=>{
+        axios.post('/users/update',{data})
+            .then(res=>{
+                if(res.status === 200){
+                    if(res.data.code === 0){
+
+                        dispatch(authSuccess(res.data.data))
+                    }else{
+                        if(res.data.msg){
+                            Toast.info(res.data.msg, 1);
+                            dispatch(errorMsg(res.data.msg))
+                        }
+                    }
+                }
+            })
+
+    }
 }
 
 //校验用户信息

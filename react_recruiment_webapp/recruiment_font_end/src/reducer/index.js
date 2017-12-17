@@ -3,7 +3,9 @@
  */
 import { combineReducers } from 'redux';
 import { user } from '../redux/user.redux';
+import { chatuser } from '../redux/chatuser.redux';
 const rootReducer = combineReducers({
-    user
+    user,
+    chatuser
 });
 export default rootReducer

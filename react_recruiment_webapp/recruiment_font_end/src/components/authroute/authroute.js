@@ -23,7 +23,6 @@ class Authroute extends Component {
         }else{
             axios.get('/users/info').then((response)=>{
                 let res = response.data;
-                console.log(res)
                 if(response.status === 200){
                     if(res.code === 1){
                        this.props.history.push('/login')

@@ -3,3 +3,17 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+.am-tab-bar{
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+.fixed-header.am-navbar{
+  position: fixed;
+  top:0;
+  z-index: 9999;
+  width: 100%;
+}
+.page-content{
+  padding:45px 5px;
+}

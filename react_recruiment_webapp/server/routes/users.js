@@ -11,12 +11,38 @@ function md5Pwd(pwd) {
     return utility.md5(utility.md5(salt+pwd))
 }
 router.get('/list', function(req, res, next) {
-
-    User.find({},(err,doc)=>{
-
-        res.json(doc)
+    const { type } = req.query
+    User.find({type},(err,doc)=>{
+        res.json({
+            code:0,
+            data:doc
+        })
     })
 });
+router.post('/update',(req,res,next)=>{
+    let userid = req.cookies.userid;
+   if(!userid){
+       return res.json({
+           code:1,
+           msg:'请重新登录'
+       })
+   };
+   let body = req.body.data;
+   User.findByIdAndUpdate(userid,body,(err,doc)=>{
+
+       const data = Object.assign({},{
+           user:doc.user,
+           type:doc.type,
+       },body);
+       return res.json({
+           code:0,
+           data
+       })
+   })
+
+});
+
+//注册
 router.post('/register', function(req, res, next) {
     const {user,pwd,type} = req.body;
 
@@ -44,6 +70,8 @@ router.post('/register', function(req, res, next) {
         });
     })
 });
+
+//登录
 router.post('/login',(req,res,next)=>{
    const {user,pwd} = req.body;
    User.findOne({user,pwd:md5Pwd(pwd)},_filter,(err,doc)=>{
@@ -53,27 +81,33 @@ router.post('/login',(req,res,next)=>{
                msg:'用户名或密码错误'
            })
        }else{
+
            res.cookie('userid',doc._id)
            res.json({
                code:0,
                data:doc
            });
-
        }
-
    })
 });
+
+//校验用户是否登录
 router.get('/info', function(req, res, next) {
     const userid = req.cookies.userid;
-
+    if(!userid){
+        return res.json({
+            code:1,
+            msg:'请重新登录'
+        })
+    }
     User.findOne({_id:userid},_filter,(err,doc)=>{
         if(err){
             return res.json({
                 code:1,
-                mgs:'后端出错了'
+                msg:'后端出错了'
             })
         };
-        console.log(doc)
+
         return res.json({
             code:0,
             data:doc
