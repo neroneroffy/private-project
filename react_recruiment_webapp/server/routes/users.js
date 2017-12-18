@@ -11,8 +11,9 @@ function md5Pwd(pwd) {
     return utility.md5(utility.md5(salt+pwd))
 }
 router.get('/list', function(req, res, next) {
-    const { type } = req.query
+    const { type } = req.query;
     User.find({type},(err,doc)=>{
+        console.log(doc)
         res.json({
             code:0,
             data:doc
