@@ -6,6 +6,7 @@ import BossInfo from '../containers/bossinfo/bossinfo';
 import Authroute from '../components/authroute/authroute';
 import SeekerInfo from '../containers/seekerinfo/seekerinfo';
 import DashBoard from '../containers/dashboard/dashboard';
+import Chat from '../containers/chat/chat';
 class Routes extends Component {
     constructor(props) {
         super(props)
@@ -22,6 +23,7 @@ class Routes extends Component {
                         <Route path="/bossinfo" component={BossInfo}></Route>
                         <Route path="/login" component={Login}></Route>
                         <Route path="/register" component={Register}></Route>
+                        <Route path="/chat/:user" component={Chat}></Route>
                         <Route component={DashBoard}></Route>
                     </Switch>
                 </div>

@@ -16,6 +16,7 @@ const initialState = {
 const AUTH_SUCCESS = "AUTH_SUCCESS";
 const ERROR_MSG = "ERROR_MSG";
 const LOAD_DATA = "LOAD_DATA";
+const LOGOUT = 'LOGOUT';
 //reducer
 export function user (state = initialState,action) {
     switch (action.type){
@@ -25,6 +26,8 @@ export function user (state = initialState,action) {
             return {...state,...action.payload};
         case ERROR_MSG:
             return {...state,msg:"",isAuth:false,msg:action.msg};
+        case LOGOUT:
+            return {...initialState,redirectTo:'/login'};
         default:
             return state;
     }
@@ -50,6 +53,11 @@ function loadData(data){
     return {
         type:LOAD_DATA,
         payload:data
+    }
+}
+export function logoutSubmit() {
+    return {
+        type:LOGOUT
     }
 }
 //注册
@@ -131,6 +139,7 @@ export function update(data) {
 
 //校验用户信息
 export function userInfo(data) {
+
     return dispatch=>{
         dispatch(loadData(data))
     }

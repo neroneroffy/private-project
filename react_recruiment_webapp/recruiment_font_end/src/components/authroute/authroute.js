@@ -27,7 +27,7 @@ class Authroute extends Component {
                     if(res.code === 1){
                        this.props.history.push('/login')
                     }else{
-                       this.props.userInfo(res.data.data)
+                        this.props.userInfo(res.data)
                     }
                 }
             })

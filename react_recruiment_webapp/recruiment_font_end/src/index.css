@@ -8,13 +8,44 @@ body {
   bottom: 0;
   z-index: 9999;
   width: 100%;
+  height: 50px!important;
 }
 .fixed-header.am-navbar{
   position: fixed;
   top:0;
   z-index: 9999;
   width: 100%;
+  height: 45px;
 }
 .page-content{
   padding:45px 5px;
+}
+.am-navbar{
+  position: fixed;
+  top:0;
+  z-index: 9999;
+  width: 100%;
+}
+
+#chat-page{
+  padding:45px 0
+}
+#chat-page .chat-me .am-list-extra{
+  flex-basis:auto;
+}
+#chat-page .chat-me .am-list-content{
+  padding-right: 15px;
+  text-align: right;
+}
+#chat-page .am-grid-icon{
+  display: none;
+}
+#chat-page .am-grid-text{
+  margin-top: 0;
+}
+.stick-footer{
+  z-index:10;
+  position: fixed;
+  bottom: 0;
+  width:100%;
 }

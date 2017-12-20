@@ -14,6 +14,7 @@
     "mongoose": "^4.13.7",
     "morgan": "~1.9.0",
     "serve-favicon": "~2.4.5",
+    "socket.io": "^2.0.4",
     "utility": "^1.13.1"
   }
 }

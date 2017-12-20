@@ -30,7 +30,7 @@ class SeekerInfo extends Component {
         const path = this.props.location.pathname;
         const redirect = this.props.redirectTo;
         return (
-            <div className="bossinfo">
+            <div className="seekerinfo" style={{paddingTop:45}}>
                 {/*完善信息成功后，跳转到其他页面*/}
                 {
                     redirect && redirect!==path?<Redirect to={this.props.redirectTo}></Redirect>:null

@@ -7,7 +7,8 @@
 var app = require('../app');
 var debug = require('debug')('server:server');
 var http = require('http');
-
+var model = require('../modules/module');
+var Chat = model.getModel('chat');
 /**
  * Get port from environment and store in Express.
  */
@@ -19,8 +20,24 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server = http.Server(app);
+const io = require('socket.io')(server);
+io.on('connection',(socket)=>{
+    socket.on('sendmsg',(data)=>{
+        const {from,to,msg} = data;
 
+        const chatid = [from,to].sort().join('_');
+        if(to){
+            Chat.create({chatid,from,to,content:msg},(err,doc)=>{
+                //console.log(Object.assign({}, doc._doc))
+                io.emit('receivemsg',Object.assign({},doc._doc))
+
+            })
+
+        }
+
+  })
+})
 /**
  * Listen on provided port, on all network interfaces.
  */

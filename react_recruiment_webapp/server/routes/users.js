@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var model = require('../modules/module');
 var User = model.getModel('users');
+var Chat = model.getModel('chat');
 var utility = require('utility');
 /* GET users listing. */
 //加密密码
@@ -13,13 +14,36 @@ function md5Pwd(pwd) {
 router.get('/list', function(req, res, next) {
     const { type } = req.query;
     User.find({type},(err,doc)=>{
-        console.log(doc)
         res.json({
             code:0,
             data:doc
         })
     })
 });
+//查询聊天信息接口
+router.get('/getmsglist',(req,res,next)=>{
+    const userid = req.cookies.userid;
+    //
+    User.find({},(err,userdoc)=>{
+        let users = {};
+        userdoc.forEach(v=>{
+            users[v._id]={
+                name:v.user,
+                avatar:v.avatar
+            }
+        })
+        Chat.find({"$or":[{from:userid},{to:userid}]},(err,doc)=>{
+            if(!err){
+                return res.json({
+                    code:0,
+                    data:doc,
+                    users:users
+                })
+            }
+        })
+    })
+
+})
 router.post('/update',(req,res,next)=>{
     let userid = req.cookies.userid;
    if(!userid){
@@ -108,7 +132,6 @@ router.get('/info', function(req, res, next) {
                 msg:'后端出错了'
             })
         };
-
         return res.json({
             code:0,
             data:doc

@@ -5,17 +5,26 @@ import Boss from '../boss/boss';
 import Msg from '../msg/msg';
 import User from '../user/user';
 import { connect } from 'react-redux';
-import { NavBar } from 'antd-mobile';
+import { NavBar,TabBar } from 'antd-mobile';
 import NavLinkBar from '../../components/nav-link-bar/nav-link-bar';
-
+import { getChatList,msgReceive } from '../../redux/chat.redux';
 @connect(
-    state=>state
+    state=>state,
+    {getChatList,msgReceive}
 )
 
 class DashBoard extends Component {
     constructor(props) {
         super(props)
         this.state = {}
+    }
+    componentDidMount(){
+
+        if(!this.props.chat.chatmsg.length){
+            console.log(this.props.chat.chatmsg.length);
+            this.props.getChatList();
+            this.props.msgReceive();
+        }
     }
     render() {
         const {pathname} = this.props.location;
@@ -65,7 +74,7 @@ class DashBoard extends Component {
                         :
                         null
                 }
-                <div style={{marginTop:45}}>
+                <div style={{marginTop:55,marginBottom:45}}>
                     <Switch>
                         {
                             navList.map(v=>(

@@ -11,7 +11,7 @@ class AvatarSelector extends Component {
     }
 
     render() {
-        console.log(this.state)
+
         const avatarList = ['boy','bull','chick','crab','girl','hedgehog','hippopotamus','koala','lemur','man','pig','tiger','whale','woman','zebra']
                         .map(v=>({
                             icon:require(`../img/${v}.png`),
