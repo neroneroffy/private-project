@@ -1,14 +1,14 @@
 import React, {Component} from 'react';
 import { List,InputItem,NavBar,Icon,Grid } from 'antd-mobile';
 import { connect } from 'react-redux';
-import { getChatList,sendMsg,msgReceive } from '../../redux/chat.redux';
+import { getChatList,sendMsg,msgReceive,readMsg } from '../../redux/chat.redux';
 import { getChatId } from '../../util/util';
 import io from 'socket.io-client';
 const socket = io('ws://localhost:3000');
 
 @connect(
     state=>state,
-    {getChatList,sendMsg,msgReceive}
+    {getChatList,sendMsg,msgReceive,readMsg}
 )
 class Chat extends Component {
     constructor(props) {
@@ -24,6 +24,10 @@ class Chat extends Component {
             this.props.msgReceive();
         }
         this.fixedBug()
+    }
+    componentWillUnmount(){
+        const to = this.props.match.params.user;
+        this.props.readMsg(to)
     }
     fixedBug(){
         setTimeout(()=>{

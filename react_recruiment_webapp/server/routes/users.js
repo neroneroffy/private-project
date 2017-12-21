@@ -20,6 +20,27 @@ router.get('/list', function(req, res, next) {
         })
     })
 });
+router.post('/readmsg',(req,res,next)=>{
+    const userid = req.cookies.userid;
+    const { from } = req.body;
+    Chat.update({from,to:userid},
+        {'$set':{read:true}},
+        {'multi':true},
+        (err,doc)=>{
+            console.log(doc);
+            if(!err){
+                return res.json({
+                    code:0,
+                    num:doc.nModified
+                })
+            }
+            return res.json({
+                code:1,
+                msg:'出错了'
+            })
+    })
+})
+
 //查询聊天信息接口
 router.get('/getmsglist',(req,res,next)=>{
     const userid = req.cookies.userid;

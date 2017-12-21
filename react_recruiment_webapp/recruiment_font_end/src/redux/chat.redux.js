@@ -23,7 +23,9 @@ export function chat(state=initState,action) {
             const n = action.payload.to === action.userid?1:0;
             return{...state,chatmsg:[...state.chatmsg,action.payload],unread:state.unread+n};
         case MSG_READ:
-            return{}
+            const {from,num} = action.payload;
+            console.log(action.payload)
+            return{...state,chatmsg:state.chatmsg.map(v=>({...v,read:from === v.from?true:v.read})),unread:state.unread-num};
         default:
             return state
     }
@@ -44,13 +46,16 @@ function receiveMsg(msg,userid) {
         userid
     }
 }
+function msgRead(from,userid,num) {
+    return {
+        type:MSG_READ,
+        payload:{from,userid,num}
+    }
+}
 export function msgReceive() {
-
     return (dispatch,getState)=>{
-        const userid = getState().user._id;
         socket.on('receivemsg',(data)=>{
-            //console.log('receivemsg',data)
-
+            const userid = getState().user._id;
             dispatch(receiveMsg(data,userid))
         })
     }
@@ -66,12 +71,24 @@ export function getChatList() {
             .then(res=>{
                 if(res.status === 200 && res.data.code === 0){
                     const userid = getState().user._id;
-                    console.log(userid);
                     dispatch(msgList(res.data.data,res.data.users,userid))
                     if(res.data.data.from){
 
                     }
 
+                }
+            })
+    }
+}
+export function readMsg(from) {
+    return (dispatch,getState)=>{
+        axios.post(`/users/readmsg`,{from})
+            .then(res=>{
+                const userid = getState().user._id;
+                if(res.status === 200 && res.data.code === 0){
+                    console.log(res.data.num);
+                    const num=res.data.num
+                    dispatch(msgRead(from,userid,num))
                 }
             })
     }

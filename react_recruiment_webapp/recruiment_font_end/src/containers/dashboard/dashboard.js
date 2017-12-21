@@ -19,12 +19,11 @@ class DashBoard extends Component {
         this.state = {}
     }
     componentDidMount(){
-
         if(!this.props.chat.chatmsg.length){
-            console.log(this.props.chat.chatmsg.length);
             this.props.getChatList();
             this.props.msgReceive();
         }
+
     }
     render() {
         const {pathname} = this.props.location;

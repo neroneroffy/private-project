@@ -35,8 +35,8 @@ class Login extends Component {
                 </div>
                 <WingBlank>
                     <List>
-                        <InputItem onChange={ value=>{this.props.handleChange('user',value)}}>用户</InputItem>
-                        <InputItem onChange={ value=>{this.props.handleChange('pwd',value)}}>密码</InputItem>
+                        <InputItem placeholder="" onChange={ value=>{this.props.handleChange('user',value)}}>用户</InputItem>
+                        <InputItem placeholder="" type="password" onChange={ value=>{this.props.handleChange('pwd',value)}}>密码</InputItem>
                     </List>
                     <WhiteSpace/>
                     <Button type="primary" onClick = {this.handleLogin}>登录</Button>
