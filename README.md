@@ -91,6 +91,7 @@ React级联选择器插件。之前工作中遇到了需要用级联选择器的
 | ------------- |:------------------:| --------:|
 | cascaderShow  | 是否显示级联选择器    | Boolean  |
 | data          | 接收的省市县数据      | Array    |
+| getData      | 动态获取数据的函数   | Function |
 | onCancel      | 点击模态层取消的函数   | Function |
 | onOk          | 选择完毕的回调函数    | Function  |
 
@@ -137,7 +138,7 @@ class App extends Component {
             cascaderShow:false
         })
     }
-    //点击异步加载数据
+    //点击异步加载数据，接受id为参数，传给后台
     getData(id){
         axios.get(`/area`,{
             params:{pid:id}
