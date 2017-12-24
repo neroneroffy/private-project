@@ -1,0 +1,82 @@
+#react-cascader{
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+.cascader-wrapper{
+    width: 100%;
+    height: 300px;
+    background: #fff;
+    position: fixed;
+    bottom:0;
+    left:0;
+    z-index: 9999;
+}
+.cascader-show-enter {
+    bottom:-300px
+}
+.cascader-show-enter.cascader-show-enter-active {
+    bottom:0;
+    transition: all 500ms ease-in;
+}
+.cascader-show-leave {
+    bottom:0;
+}
+.cascader-show-leave.cascader-show-leave-active {
+    bottom:-300px;
+    transition: all 300ms ease-in;
+}
+
+.cascader-modal{
+    width: 100%;
+    height: 100%;
+    background: rgb(0,0,0);
+    position: fixed;
+    top:0;
+    left:0;
+    z-index: 9998;
+    opacity: 0.3;
+}
+
+.cascader-modal-show-enter {
+    opacity: 0
+}
+.cascader-modal-show-enter.cascader-modal-show-enter-active {
+    opacity: 0.3;
+    transition: all 200ms ease-in;
+}
+.cascader-modal-show-leave {
+    opacity: 0.3
+}
+.cascader-modal-show-leave.cascader-modal-show-leave-active {
+    opacity: 0;
+    transition: all 300ms ease-in;
+}
+
+#react-cascader .cascader-header{
+    display: flex;
+    justify-content: space-between;
+}
+#react-cascader .cascader-title{
+    flex:1;
+    text-align: center;
+    height: 30px;
+    line-height: 30px;
+
+}
+#react-cascader .cascader-title:nth-child(2){
+/*    border-left: 1px solid #cccccc;
+    border-right: 1px solid #cccccc;*/
+}
+#react-cascader .cascader-body{
+    width: 100%;
+    overflow: auto;
+    height: 270px;
+
+}
+#react-cascader .cascader-item{
+    font-size: 14px;
+    padding:0 10px;
+    height: 32px;
+    line-height: 32px;
+}
