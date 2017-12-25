@@ -1,10 +1,10 @@
 ﻿业余时间写的关于react,vue两个框架的训练，以及一些小工具
 
-[React + Node.js +  MongoDB实时聊天WebApp (react_recruiment_webapp)](#react_recruiment_webapp)<br/>
-[React移动端省市县级联选择器 (react_cascader)](#react_cascader)<br/>
-[vue.js + node.js + MongoDB 商城(vue_shop)](#vue_shop)<br/>
-[vue.js + node.js + MongoDB 上传图片组件(vue_uploader)](#vue_uploader)<br/>
-[Vue.js饿了么商家模块(ele)](#ele)
+* [React + Node.js +  MongoDB实时聊天WebApp (react_recruiment_webapp)](#react_recruiment_webapp)<br/>
+* [React移动端省市县级联选择器 (react_cascader)](#react_cascader)<br/>
+* [vue.js + node.js + MongoDB 商城(vue_shop)](#vue_shop)<br/>
+* [vue.js + node.js + MongoDB 上传图片组件(vue_uploader)](#vue_uploader)<br/>
+* [Vue.js饿了么商家模块(ele)](#ele)
 
 <h2 id="react_recruiment_webapp">React + Node.js +  MongoDB实时聊天WebApp (react_recruiment_webapp)</h2>
 
@@ -28,9 +28,11 @@
 聊天功能：
 
 ![image](https://github.com/capslocktao/private-project/blob/master/react_recruiment_webapp/chat_show.gif)
-***
+
 ## 总结
 在某网上看到了这个教程，蠢蠢欲动，于是去网上找免费的资源，无奈找了一圈也没找到，所以狠了心买了一套。钱确实没白花，之前自己写过一个react上线项目，但是全凭自己摸索出来的，代码目录的组织方式以及redux的状态如何存储都是自己定的。写这个项目时候把用jsx写代码的方式重新认识了一遍，而且，view层和redux的状态层划分的很清晰，需要派发action和获取store状态的组件只需要外层包一个connect，然后要做出动作，触发函数dispatch出去就好。当时理解redux很是费劲，大神们为了把问题简单化，设计了很多架构，但是这些架构越来越复杂，需要一定的学习曲线，不过用的时候，真的是特别的方便。
+
+***
 
 <h2 id="react_cascader">React移动端省市县级联选择器 (react_cascader)</h2>
 
